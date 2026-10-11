@@ -23,4 +23,12 @@ public class MainLayout extends BorderPane {
         centerContainer.setStyle("-fx-alignment: center");
         setCenter(centerContainer);
     }
+    
+    public IOPanel getIOPanel() {
+        return ioPanel;
+    }
+    
+    public CartesianPane getCartesianPane() {
+        return cartesianPane;
+    }
 }
