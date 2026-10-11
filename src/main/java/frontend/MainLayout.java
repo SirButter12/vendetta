@@ -4,10 +4,12 @@
  */
 package frontend;
 
+import javafx.scene.layout.BorderPane;
+
 /**
  *
  * @author adria
  */
-public class MainLayout {
+public class MainLayout extends BorderPane {
     
 }
