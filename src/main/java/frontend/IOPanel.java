@@ -4,10 +4,12 @@
  */
 package frontend;
 
+import javafx.scene.layout.VBox;
+
 /**
  *
  * @author adria
  */
-public class IOPanel {
+public class IOPanel extends VBox {
     
 }
