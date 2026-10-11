@@ -5,11 +5,22 @@
 package frontend;
 
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 
 /**
  *
  * @author adria
  */
 public class MainLayout extends BorderPane {
+    private IOPanel ioPanel;
+    private CartesianPane cartesianPane;
     
+    public MainLayout() {
+        ioPanel = new IOPanel();
+        cartesianPane = new CartesianPane();
+        
+        HBox centerContainer = new HBox(ioPanel, cartesianPane);
+        centerContainer.setStyle("-fx-alignment: center");
+        setCenter(centerContainer);
+    }
 }
