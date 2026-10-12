@@ -10,10 +10,9 @@ package linear.vendetta;
  */
 public interface operable<T> {
     
-    T add(T a);
-    T subtract(T a);
-    T dotProduct(T a);
-    T scalarMult(double k);
+    void add(T a);
+    void subtract(T a);
+    void scalarMult(double k);
     
     //TO review: Usage of T (Placeholder)
 }
