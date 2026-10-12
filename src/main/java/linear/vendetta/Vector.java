@@ -142,7 +142,52 @@ public abstract class Vector implements operable<Vector> {
         result.scalarMult(factor);
         return result;
     }
+      
+      @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Vector other)) return false;
+        if (this.dimension != other.dimension) return false;
+ 
+        for (int i = 0; i < dimension; i++) {
+            if (Double.compare(clean(values.get(i)), clean(other.values.get(i))) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
     
+    @Override
+    public int hashCode() {
+        int result = 1;
+        for (double x : values) {
+            result = 31 * result + Double.hashCode(clean(x));
+        }
+        return result;
+    }
+    
+    /**
+     * Readable form for display, e.g. [1, 2.5, -3].
+     * Whole numbers lose the ".0" and long decimals are rounded to
+     * DISPLAY_DECIMALS places. This affects DISPLAY ONLY; the stored
+     * values keep full precision.
+     */
+    @Override
+    public String toString() {
+        StringBuilder text = new StringBuilder("[");
+        for (int i = 0; i < dimension; i++) {
+            if (i > 0) text.append(", ");
+            text.append(formatNumber(values.get(i)));
+        }
+        return text.append("]").toString();
+    }
+    
+    /**
+     * Checks that this vector and v have the same size before a two-vector
+     * operation (add, subtract, dotProduct, projectOn).
+     *
+     * @throws DimensionMismatchException if the sizes differ
+     */
     private void validateDimensions(Vector v) {
         Objects.requireNonNull(v, "The other vector cannot be null.");
         if (this.dimension != v.dimension) {
@@ -151,8 +196,7 @@ public abstract class Vector implements operable<Vector> {
                             + this.dimension + " and " + v.dimension + ".");
         }
     }
-    
-    /**
+ /**
      * exists because I was too lazy to write it twice
      * @param v is the vector v
      * @param required how many you need
@@ -187,4 +231,27 @@ public abstract class Vector implements operable<Vector> {
     }
     
     
+    /**
+     * Turns -0.0 into 0.0 (adding 0.0 does exactly that).
+     * Without this, [0] and [-0] (which appears after scalarMult(-1) on a zero)
+     * would count as different vectors.
+     */
+    private static double clean(double x) {
+        return x + 0.0;
+    }
+ 
+    /** Formats one number for toString(): 3.0 -> "3", 2.50 -> "2.5", -0.00001 -> "0". */
+    private static String formatNumber(double x) {
+        if (Double.isNaN(x) || Double.isInfinite(x)) {
+            return String.valueOf(x);
+        }
+        // Locale.ROOT forces a "." decimal point even on a French (comma) computer.
+        String text = String.format(Locale.ROOT, "%." + DISPLAY_DECIMALS + "f", x);
+        if (text.contains(".")) {
+            text = text.replaceAll("0+$", "").replaceAll("\\.$", "");   // trim trailing zeros
+        }
+        return text.equals("-0") ? "0" : text;
+    }
 }
+    
+    
