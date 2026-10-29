@@ -19,14 +19,34 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
        
      // Private: go through build()
-    private Matrix(List<Vector> rows) {
+    public Matrix(int n, int m) {
+        if (n <= 0 || m <= 0) {
+            throw new IllegalArgumentException("A matrix needs at least 1 row and 1 column");
+        }
+
+        this.rows = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            this.rows.add(new Vector(m));        
+        }
+
+        this.size = new int[]{n, m};
+        calcDeterminant();
+    }
+    
+    public Matrix(Matrix m) {
+        this.rows = m.rows;
+        this.size = m.size;
+        this.determinant = m.determinant;
+    }
+    
+    public Matrix(List<Vector> rows) {
         this.rows = rows;
         this.size[0] = rows.size();                  // number of rows
         this.size[1] = vectorValues(rows.get(0)).size(); // number of columns
         calcDeterminant();
     }
     
-    public static Matrix inverse() {
+    public static Matrix inverse(Matrix m) {
         /*
         Vector vector = new Vector(1);
         this.rows.add(vector);  //TODO: Content
@@ -54,7 +74,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         return build(equations);
     }
     
-    public static Matrix adj() {
+    public static Matrix adj(Matrix m) {
         List<Vector> equations = new ArrayList<>();
         
         return build(equations);
@@ -235,6 +255,8 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         return build(result);
     }
     
-    
+    public double getDeterminant() {
+        return determinant;
+    }
  
 }
