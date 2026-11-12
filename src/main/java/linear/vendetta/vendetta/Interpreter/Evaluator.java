@@ -207,15 +207,6 @@ public class Evaluator {
         }
     }    
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
     private static Object sum(Object o1, Object o2) {
         if (o1 instanceof Vector v1 && o2 instanceof Vector v2) {
             return v1.add(v2);
