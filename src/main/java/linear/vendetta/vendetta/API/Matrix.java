@@ -50,19 +50,55 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         this.determinant = m.determinant;
     }
     
-    //--TO BE IMPLEMENTED--
-    
-    public Matrix getSubMatrix(int i , int j) {
-        List<Vector> equations = new ArrayList<>();
-        
-        return build(equations);
+    public Matrix getSubMatrix(int i, int j) {
+        if (i < 0 || i >= size[0] || j < 0 || j >= size[1]) {
+            throw new IndexOutOfBoundsException(
+                    "Position (" + i + ", " + j + ") is outside a "
+                    + size[0] + "x" + size[1] + " matrix.");
+        }
+        if (size[0] < 2 || size[1] < 2) {
+            throw new IllegalArgumentException("A submatrix needs a matrix of at least 2x2.");
+        }
+
+        List<Vector> subRows = new ArrayList<>();
+        for (int r = 0; r < size[0]; r++) {
+            if (r == i) continue;                       // skip row i
+
+            List<Double> values = new ArrayList<>();
+            for (int c = 0; c < size[1]; c++) {
+                if (c == j) continue;                   // skip column j
+                values.add(get(r, c));
+            }
+            subRows.add(new Vector(values));
+        }
+
+        return build(subRows);
     }
-    
+
     public static Matrix adj(Matrix m) {
-        return m;
+        int n = m.getNumRows();
+        if (n != m.getNumCols()) {
+            throw new IllegalArgumentException("The adjugate only exists for square matrices.");
+        }
+
+        if (n == 1) {
+            return identity(1);
+        }
+
+        Matrix result = new Matrix(n, n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                double minor = m.getSubMatrix(i, j).getDeterminant();
+                double sign = ((i + j) % 2 == 0) ? 1.0 : -1.0;
+
+                result.rows.get(j).set(i, sign * minor);
+            }
+        }
+
+        return result;
     }
-    
-    
+
+
     //--ALREADY WORKING AND TESTED--
     
     public static Matrix pow(Matrix m, double k) {
@@ -196,9 +232,16 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     
     
     public static Matrix inverse(Matrix m) {
-        Matrix adj = Matrix.adj(m);
-        
-        return adj.scalarMult(1 / m.getDeterminant());
+        if (m.getNumRows() != m.getNumCols()) {
+            throw new IllegalArgumentException("Only square matrices have an inverse.");
+        }
+
+        double det = m.getDeterminant();
+        if (m.getDeterminant() == 0) {
+            throw new ArithmeticException("The matrix is singular (det = 0), so it has no inverse.");
+        }
+
+        return Matrix.adj(m).scalarMult(1.0 / det);
     }
     
     @Override  
