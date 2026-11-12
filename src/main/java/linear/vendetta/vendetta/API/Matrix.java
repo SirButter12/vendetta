@@ -155,11 +155,14 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
     @Override
     public Matrix scalarMult(double k) {
-        return Matrix.build(List.of(
-                new Vector(List.of(1, 0, 0)),
-                new Vector(List.of(0, 1, 0)),
-                new Vector(List.of(0, 0, 1))
-        ));
+        List<Vector> vectors = this.getRows();
+        List<Vector> resultm = new ArrayList<Vector>();
+        
+        for(int i = 0; i < vectors.size(); i++) {
+            resultm.add(vectors.get(i).scalarMult(k));
+        }
+        
+        return Matrix.build(resultm);
     }
     
     public List<Vector> getRows() {
