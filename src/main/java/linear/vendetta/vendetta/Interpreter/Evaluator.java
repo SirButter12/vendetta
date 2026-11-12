@@ -383,6 +383,10 @@ public class Evaluator {
             return Math.pow(x, y);
         }
         
+        if (o1 instanceof Matrix m && o2 instanceof Double a) {
+            return Matrix.pow(m, a);
+        }
+        
         throw new CommandException("^ only works for numbers!!!");
     }
     

@@ -105,7 +105,37 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         return m;
     }
 
+    public static Matrix pow(Matrix m, double k) {
+        if (!(k % 1 == 0)) {
+            throw new IllegalArgumentException("Matrix powers only work with integer powers!");
+        }
+        
+        if (m.getNumCols() != m.getNumRows()) {
+            throw new IllegalArgumentException("Matrix powers only work on square matrices!");
+        }
+        
+        if (k == 0) {
+            return identity(m.getNumCols());
+        }
+        
+        if (k < 0) {
+            return pow(inverse(m), -k);
+        }
+        
+        return multiply(m, pow(m, k - 1));
+    }
+    
+    public static Matrix identity(int n) {
+        List<Vector> rows = new ArrayList<>();
 
+        for (int i = 0; i < n; i++) {
+            Vector row = new Vector(n);  
+            row.set(i, 1.0);             
+            rows.add(row);
+        }
+
+        return Matrix.build(rows);
+    }
     
     
     
