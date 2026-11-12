@@ -1,16 +1,36 @@
 DA RULES
 
-1. NEVER WORK ON A FILE YOU ARE NOT ASSIGNED TO, unless really necessary.
-   (Current work division: Ian -> API, Mathews -> Controllers, Adrian -> FXML)
+1. Follow Ian's word as if it was god's
 
-2. Pull before working.
+2. NEVER WORK ON A FILE YOU ARE NOT ASSIGNED TO, unless really necessary.
 
-3. If for whatever reason you have to mess around with someone else's code, tell them.
+    current work division:
+        Ian: API
+        Matthews: Controllers
+        Adrian: FXML
+ 
+3. Pull before working. Every. Single. Time.
+ 
+4. If for whatever reason you have to mess around with someone else's code, tell them.
+ 
+5. Read whatever updates there are on Instagram.
 
-4. Read whatever updates there are on Instagram.
+6. Commit small, push often. Never leave work unpushed overnight.
+ 
+7. Got a merge conflict? STOP. talk to the team to see what is going on
+ 
+8. NEVER "git push --force". Ever.
 
-5. Don't feed it after midnight.
+9. Before committing, check what you're committing. If you see target/ or .idea/ in there, don't.
 
-6. Don't let it get wet.
+10. Don't feed it after midnight.
 
-7. Do not expose it to direct sunlight.
+11. Don't let it get wet.
+
+12. Do not expose it to direct sunlight.
+
+13. Have fun.
+
+14. Follow Geneva suggestions (optional).
+
+15. There is no rules
