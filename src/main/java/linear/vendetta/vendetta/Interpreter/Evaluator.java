@@ -87,7 +87,8 @@ public class Evaluator {
             case "sec" -> sec(args);
             case "csc" -> csc(args);
             case "cot" -> cot(args);
-            case "ln" -> ln(args);   
+            case "ln" -> ln(args);
+            case "sqrt" -> sqrt(args);
                 
                 
             default -> throw new IllegalStateException("Unexpected value: " + (node.text()));
@@ -285,6 +286,16 @@ public class Evaluator {
         throw new CommandException("invalid argument");
     }
     
+    private static Object sqrt(List<Object> args) {
+        expectArgs("sqrt", args, 1);
+        
+        if (args.get(0) instanceof Double x) {
+            return Math.sqrt(x);
+        }
+        
+        throw new CommandException("invalid argument");
+    }     
+    
     private static void expectArgs(String fn, List<Object> args, int n) {
         if (args.size() != n) {
             throw new CommandException(fn + " needs " + n + " argument(s)");
@@ -368,7 +379,7 @@ public class Evaluator {
     }
     
     private static Object exp(Object o1, Object o2) {
-        if (o1 instanceof Double x && o1 instanceof Double y) {
+        if (o1 instanceof Double x && o2 instanceof Double y) {
             return Math.pow(x, y);
         }
         

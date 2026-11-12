@@ -125,14 +125,13 @@ public class Parser {
     }
     
     private Node parseExp() {
-        Node left = parseUnary();
-        while (peek().tokenType == TokenType.EXP) {
-            String op = next().oriText;                 
-            Node right = parseUnary();                   
-            left = new Node(NodeKind.BINARY, op, List.of(left, right));
+        Node base = parseFactor();
+        if (peek().tokenType == TokenType.EXP) {
+            String op = next().oriText;
+            Node exponent = parseUnary();
+            return new Node(NodeKind.BINARY, op, List.of(base, exponent));
         }
-        
-        return left;
+        return base;
     }
     
     private Node parseStatement() {

@@ -5,7 +5,6 @@
 package linear.vendetta.vendetta.Interpreter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +18,9 @@ public class Interpreter {
     private static final Set<String> CONSTANTS = Set.of("pi", "e");
     
     static {
+        if (Interpreter.class.getResource("/coconut.jpg") == null) throw new Error("coconut.jpg not found. boom boom no linear algebra for you");
+    
+        
         memory.put("pi", Math.PI);
         memory.put("e", Math.E);
     }
