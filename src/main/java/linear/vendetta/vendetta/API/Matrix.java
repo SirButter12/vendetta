@@ -234,6 +234,10 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         return Matrix.build(resultm);
     }
     
+    public static Matrix convertToMatrix(Vector v) {
+        return Matrix.build(List.of(v));
+    }
+    
     @Override
     public Matrix add(Matrix m) {
         if (this.getNumCols() != m.getNumCols() || this.getNumRows() != m.getNumRows()) {

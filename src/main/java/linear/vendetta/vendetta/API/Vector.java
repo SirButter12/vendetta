@@ -159,6 +159,14 @@ public class Vector implements operable<Vector> {
         result.scalarMult(factor);
         return result;
     }
+    
+    public static Vector convertToVector(Matrix m) {
+        if (m.getNumCols() != 1) {
+            throw new IllegalArgumentException("m is not a vector matrix");
+        }
+        
+        return m.getRows().get(0);
+    }
       
       /*
     @Override
