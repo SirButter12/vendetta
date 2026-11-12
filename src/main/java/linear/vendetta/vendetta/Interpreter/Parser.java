@@ -91,19 +91,16 @@ public class Parser {
     
     private Node parseUnary() {
         if (peek().tokenType == TokenType.MINUS) {
-            next();                                    
-            Node operand = parseUnary();                
-
+            next();
+            Node operand = parseUnary();
             if (operand.kind() == NodeKind.NUMBER) {
                 return new Node(NodeKind.NUMBER, String.valueOf(-Double.parseDouble(operand.text())), List.of());
             }
-            
             return new Node(NodeKind.BINARY, "*", List.of(new Node(NodeKind.NUMBER, "-1", List.of()), operand));
         }
-        
-        return parseFactor();
+        return parseExp();  
     }
-    
+
     private Node parseExpression() {
         Node left = parseTerm();                        
         while (peek().tokenType == TokenType.PLUS || peek().tokenType == TokenType.MINUS) {
@@ -115,20 +112,20 @@ public class Parser {
     }
 
     private Node parseTerm() {
-        Node left = parseExp();                        
+        Node left = parseUnary();
         while (peek().tokenType == TokenType.STAR || peek().tokenType == TokenType.SLASH) {
-            String op = next().oriText;                 
-            Node right = parseExp();                   
+            String op = next().oriText;
+            Node right = parseUnary();
             left = new Node(NodeKind.BINARY, op, List.of(left, right));
         }
         return left;
     }
     
     private Node parseExp() {
-        Node base = parseFactor();
+        Node base = parseFactor();   
         if (peek().tokenType == TokenType.EXP) {
             String op = next().oriText;
-            Node exponent = parseUnary();
+            Node exponent = parseUnary();   
             return new Node(NodeKind.BINARY, op, List.of(base, exponent));
         }
         return base;
