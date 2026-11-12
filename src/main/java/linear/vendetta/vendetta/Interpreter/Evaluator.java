@@ -77,7 +77,8 @@ public class Evaluator {
             case "project" -> project(args);
             case "solveSystem" -> solveSystem(args);
             case "Vector" -> vector(args);
-            case "Matrix" -> matrix(args);    
+            case "Matrix" -> matrix(args);
+            case "triangulize" -> triangulize(args);
                 
             default -> throw new IllegalStateException("Unexpected value: " + (node.text()));
         };
@@ -186,11 +187,21 @@ public class Evaluator {
         return new Matrix(toSize(args.get(0)), toSize(args.get(1)));
     }
 
-        private static int toSize(Object o) {
+    private static int toSize(Object o) {
         if (o instanceof Double d && d == Math.floor(d) && d > 0) {
             return d.intValue();
         }
         throw new CommandException("Sizes must be whole positive numbers");
+    }
+    
+    private static Object triangulize(List<Object> args) {
+        expectArgs("triangulize", args, 1);
+        
+        if (args.get(0) instanceof Matrix m) {
+            return m.toTriangle();
+        }
+        
+        throw new CommandException("invalid argument");
     }
         
     private static void expectArgs(String fn, List<Object> args, int n) {
