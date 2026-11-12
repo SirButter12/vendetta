@@ -132,12 +132,20 @@ public class Evaluator {
     }
     
     private static Object dot(List<Object> args) {
-        if (args.get(0) instanceof Vector v1 && args.get(1) instanceof Vector v2) {
-            if (args.size() != 2) {
+        if (args.size() != 2) {
                 throw new CommandException("Invalid argument, amount not compatible");
             }
-            
+        
+        if (args.get(0) instanceof Vector v1 && args.get(1) instanceof Vector v2) {
             return v1.dotProduct(v2);
+        }
+        
+        if (args.get(0) instanceof Matrix m1 && args.get(1) instanceof Matrix m2) {
+            return Matrix.multiply(m1, m2);
+        }
+        
+        if (args.get(0) instanceof Matrix m && args.get(1) instanceof Vector v) {
+            return Matrix.multiply(m, v);
         }
         
         throw new CommandException("Invalid argument for function");
