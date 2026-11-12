@@ -20,7 +20,7 @@ public class Vector implements operable<Vector> {
 
 
     /** The components of the vector in order: x, y, z, ... */
-    private List<Double> values;
+    protected List<Double> values;
  
     /** How many components the vector has. Always equals values.size(). */
     private int dimension;

@@ -9,7 +9,7 @@ package linear.vendetta.vendetta.API;
  * @author Alex
  */
 public interface elementalOperations<T> {
-    void rowMultiply(double a, int idx);
-    void rowSwap(int idx1, int idx2);
-    void rowComp(int idx1, int idx2, double k);
+    String rowMultiply(double a, int idx);
+    String rowSwap(int idx1, int idx2);
+    String rowComp(int idx1, int idx2, double k);
 }

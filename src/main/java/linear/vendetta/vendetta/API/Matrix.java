@@ -245,25 +245,29 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     }
     
     @Override  
-    public void rowMultiply(double a, int idx) {
+    public String rowMultiply(double a, int idx) {
         Vector oldVector = this.rows.get(idx);
         Vector newVector = oldVector.scalarMult(a); 
         this.rows.set(idx, newVector);
         this.determinant = determinant * a;
+        
+        return String.format("R_%i -> R_%i * %d\n", idx, idx, a);
     }
 
 
     @Override
-    public void rowSwap(int idx1, int idx2) {
+    public String rowSwap(int idx1, int idx2) {
         Collections.swap(this.rows, idx1, idx2); //skeptical if it works but it
         //should work
         
         this.determinant = determinant * -1;
+        
+        return String.format("R_%i <-> R_%i\n", idx1, idx2);
     }
 
 
     @Override
-    public void rowComp(int idx1, int idx2, double k) {
+    public String rowComp(int idx1, int idx2, double k) {
         List<Double> target = vectorValues(this.rows.get(idx1));
         List<Double> source = vectorValues(this.rows.get(idx2));
         
@@ -273,6 +277,8 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         }
         
         this.rows.set(idx1, new Vector(combined));
+        
+        return String.format("R_%i -> R_%i + %d * R_%i\n", idx1, k, idx2);
     }
     
     public void calcDeterminant() {
