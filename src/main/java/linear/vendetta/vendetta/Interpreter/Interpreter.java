@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -15,6 +16,12 @@ import java.util.List;
  */
 public class Interpreter {
     private static HashMap<String, Object> memory = new HashMap();
+    private static final Set<String> CONSTANTS = Set.of("pi", "e");
+    
+    static {
+        memory.put("pi", Math.PI);
+        memory.put("e", Math.E);
+    }
     
     public static List<CompiledResult> compile(List<String> commands) {
         List<CompiledResult> results = new ArrayList<CompiledResult>();
@@ -32,6 +39,10 @@ public class Interpreter {
     }
     
     public static void assignToMemory(String name, Object obj) {
+        if (CONSTANTS.contains(name)) {
+            throw new CommandException(name + " is a constant and cannot be reassigned");
+        }
+        
         memory.put(name, obj);
     }
     

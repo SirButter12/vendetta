@@ -3,6 +3,7 @@ package linear.vendetta.vendetta.Interpreter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.lang.Math;
 import linear.vendetta.vendetta.API.Matrix;
 import linear.vendetta.vendetta.API.Vector;
 import linear.vendetta.vendetta.Interpreter.Node.NodeKind;
@@ -55,6 +56,7 @@ public class Evaluator {
             case "-" -> sub(left, right);
             case "*" -> times(left, right);
             case "/" -> div(left, right);    
+            case "^" -> exp(left, right);   
             default -> throw new IllegalStateException("Unexpected value: " + (node.text()));
         };
     }
@@ -79,6 +81,14 @@ public class Evaluator {
             case "Vector" -> vector(args);
             case "Matrix" -> matrix(args);
             case "triangulize" -> triangulize(args);
+            case "sin" -> sin(args);
+            case "cos" -> cos(args);
+            case "tan" -> tan(args);   
+            case "sec" -> sec(args);
+            case "csc" -> csc(args);
+            case "cot" -> cot(args);
+            case "ln" -> ln(args);   
+                
                 
             default -> throw new IllegalStateException("Unexpected value: " + (node.text()));
         };
@@ -204,6 +214,77 @@ public class Evaluator {
         throw new CommandException("invalid argument");
     }
         
+    
+    private static Object sin(List<Object> args) {
+        expectArgs("sin", args, 1);
+        
+        if (args.get(0) instanceof Double x) {
+            return Math.sin(x);
+        }
+        
+        throw new CommandException("invalid argument");
+    }
+    
+    private static Object cos(List<Object> args) {
+        expectArgs("cos", args, 1);
+        
+        if (args.get(0) instanceof Double x) {
+            return Math.cos(x);
+        }
+        
+        throw new CommandException("invalid argument");
+    }
+    
+    private static Object tan(List<Object> args) {
+        expectArgs("tan", args, 1);
+        
+        if (args.get(0) instanceof Double x) {
+            return Math.tan(x);
+        }
+        
+        throw new CommandException("invalid argument");
+    }
+    
+    private static Object sec(List<Object> args) {
+        expectArgs("sec", args, 1);
+        
+        if (args.get(0) instanceof Double x) {
+            return 1 / Math.cos(x);
+        }
+        
+        throw new CommandException("invalid argument");
+    }
+    
+    private static Object csc(List<Object> args) {
+        expectArgs("csc", args, 1);
+        
+        if (args.get(0) instanceof Double x) {
+            return 1 / Math.sin(x);
+        }
+        
+        throw new CommandException("invalid argument");
+    }
+    
+    private static Object cot(List<Object> args) {
+        expectArgs("cot", args, 1);
+        
+        if (args.get(0) instanceof Double x) {
+            return 1 / Math.tan(x);
+        }
+        
+        throw new CommandException("invalid argument");
+    }
+    
+    private static Object ln(List<Object> args) {
+        expectArgs("ln", args, 1);
+        
+        if (args.get(0) instanceof Double x) {
+            return Math.log(x);
+        }
+        
+        throw new CommandException("invalid argument");
+    }
+    
     private static void expectArgs(String fn, List<Object> args, int n) {
         if (args.size() != n) {
             throw new CommandException(fn + " needs " + n + " argument(s)");
@@ -285,6 +366,15 @@ public class Evaluator {
      
         throw new CommandException("Cannot divide " + o1.getClass().getSimpleName() + " by " + o2.getClass().getSimpleName());
     }
+    
+    private static Object exp(Object o1, Object o2) {
+        if (o1 instanceof Double x && o1 instanceof Double y) {
+            return Math.pow(x, y);
+        }
+        
+        throw new CommandException("^ only works for numbers!!!");
+    }
+    
     
     private static Object scale(Object o, double k) {
         if (o instanceof Matrix m) {

@@ -18,6 +18,6 @@ public class Token {
     }
     
     public static enum TokenType {
-        NAME, NUMBER, PLUS, MINUS, STAR, SLASH, LPAREN, RPAREN, COMMA, EQUALS, FUNCT, END
+        NAME, NUMBER, PLUS, MINUS, STAR, SLASH, EXP, LPAREN, RPAREN, COMMA, EQUALS, FUNCT, END
     }
 }

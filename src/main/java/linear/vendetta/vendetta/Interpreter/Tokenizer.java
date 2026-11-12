@@ -17,7 +17,8 @@ public class Tokenizer {
     private String command;
     private List<Token> tokens = new ArrayList<>();
     private static final List<String> reservedWords = List.of(
-            "adj","inv","trans","det","dot", "cross", "project", "solveSystem", "Vector", "Matrix", "triangulize"
+            "adj","inv","trans","det","dot", "cross", "project", "solveSystem", "Vector", "Matrix", "triangulize",
+            "sin", "cos", "tan", "sec", "csc", "cot", "ln"
     );
     private static HashMap<Character, TokenType> tokenMapping = new HashMap();
      
@@ -31,6 +32,7 @@ public class Tokenizer {
         tokenMapping.put(')', TokenType.RPAREN);
         tokenMapping.put('/', TokenType.SLASH);
         tokenMapping.put('*', TokenType.STAR);
+        tokenMapping.put('^', tokenType.EXP);
     }
     
     public Tokenizer(String command) {
