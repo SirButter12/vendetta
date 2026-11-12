@@ -18,7 +18,7 @@ public class Interpreter {
     private static final Set<String> CONSTANTS = Set.of("pi", "e");
     
     static {
-        if (Interpreter.class.getResource("/coconut.jpg") == null) throw new Error("coconut.jpg not found. boom boom no linear algebra for you");
+      
     
         
         memory.put("pi", Math.PI);

@@ -1,5 +1,6 @@
 package linear.vendetta.vendetta;
 
+/*
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -7,12 +8,18 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+*/
 
 /**
- * JavaFX App
+ * JavaFX App (JavaFX deactivated temporally, only console version available for testing).
+ *
+ *remove comments to reactivate javaFX
+ * 
+ * @author Ian, Adrian, Matthews
  */
-public class App extends Application {
+public class App /* extends Application */ {
 
+    /*
     private static Scene scene;
 
     @Override
@@ -30,9 +37,11 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
     }
+    */
 
     public static void main(String[] args) {
-        launch();
+        // launch();                 // <- version JavaFX
+        ConsoleApp.main(args);       // <- version de consola
     }
 
 }
