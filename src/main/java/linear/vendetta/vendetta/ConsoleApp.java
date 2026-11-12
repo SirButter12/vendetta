@@ -16,7 +16,7 @@ public class ConsoleApp {
     public static void main(String[] args) {
         if (args.length > 0) {
             for (String line : args) {
-                System.out.println(":v " + line);
+                System.out.println("v: " + line);
                 runCommand(line);
             }
             return;
@@ -26,7 +26,7 @@ public class ConsoleApp {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.print("\n:v ");
+            System.out.print("\nv: ");
 
             if (!scanner.hasNextLine()) {
                 break;

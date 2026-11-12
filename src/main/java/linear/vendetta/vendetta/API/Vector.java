@@ -7,6 +7,7 @@ package linear.vendetta.vendetta.API;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 
@@ -15,6 +16,7 @@ import java.util.Objects;
  * @author Alex
  */
 public class Vector implements operable<Vector> {
+    private static final int DISPLAY_DECIMALS = 4;
 
 
     /** The components of the vector in order: x, y, z, ... */
@@ -40,9 +42,9 @@ public class Vector implements operable<Vector> {
     
     //By Ian,here is the constructor that generates a copy of the vector
     public Vector(Vector v) {
-        this.values = v.getValues();
-        this.dimension = v.getDimension();
-    }    
+        this.values = new ArrayList<>(v.values);
+        this.dimension = v.dimension;
+    }
     
     /**
      * Builds a vector of the given size where every component is 0.0.
@@ -69,8 +71,8 @@ public class Vector implements operable<Vector> {
     }
  
     public void setValues(List<Double> newValues) {
-        this.dimension = this.values.size();
         this.values = validatedCopy(newValues);
+        this.dimension = this.values.size();
     }
  
     /** Gets one component. Index starts at 0. */
@@ -154,10 +156,7 @@ public class Vector implements operable<Vector> {
  
         double factor = this.dotProduct(v) / vDotV;
         
-        //This logic makes sense, i will find bug later/a fix later
-        Vector result = new Vector(v);   // copy first so v itself is never called
-        result.scalarMult(factor);
-        return result;
+        return v.scalarMult(factor);
     }
     
     public static Vector convertToVector(Matrix m) {
@@ -165,7 +164,7 @@ public class Vector implements operable<Vector> {
             throw new IllegalArgumentException("m is not a vector matrix");
         }
         
-        return m.getRows().get(0);
+        return m.transpose().getRows().get(0);
     }
       
       /*
@@ -206,7 +205,7 @@ public class Vector implements operable<Vector> {
         StringBuilder text = new StringBuilder("[");
         for (int i = 0; i < dimension; i++) {
             if (i > 0) text.append(", ");
-            text.append(values.get(i));
+            text.append(formatNumber(values.get(i)));
         }
         return text.append("]").toString();
     }
@@ -270,10 +269,7 @@ public class Vector implements operable<Vector> {
     }
  
     
-    /** Formats one number for toString(): 3.0 -> "3", 2.50 -> "2.5", -0.00001 -> "0". */
-    /*
-    
-    private static String formatNumber(double x) {
+    public static String formatNumber(double x) {
         if (Double.isNaN(x) || Double.isInfinite(x)) {
             return String.valueOf(x);
         }
@@ -284,5 +280,4 @@ public class Vector implements operable<Vector> {
         }
         return text.equals("-0") ? "0" : text;
     }
-    */
 }

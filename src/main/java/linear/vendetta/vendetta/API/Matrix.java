@@ -44,8 +44,9 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     }
     
     public Matrix(Matrix m) {
-        this.rows = m.rows;
-        this.size = m.size;
+        this.rows = new ArrayList<>();
+        for (Vector r : m.rows) this.rows.add(new Vector(r));
+        this.size = m.size.clone();
         this.determinant = m.determinant;
     }
     
@@ -241,7 +242,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     }
     
     public static Matrix convertToMatrix(Vector v) {
-        return Matrix.build(List.of(v));
+        return Matrix.build(List.of(v)).transpose();
     }
     
     @Override
@@ -346,6 +347,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     public void calcDeterminant() {
         if (size[0] != size[1]) {
             determinant = NaN;
+            return;
         }
         Matrix tri = toTriangle();          
         double total = 1.0;
@@ -450,12 +452,10 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         return build(transposed);
     }
         
-    /*
-       @Override
+    @Override
     public String toString() {
         int numRows = size[0];
         int numCols = size[1];
-
 
         String[][] cells = new String[numRows][numCols];
         int[] widths = new int[numCols];
@@ -465,7 +465,6 @@ public class Matrix implements operable<Matrix>, elementalOperations {
                 widths[c] = Math.max(widths[c], cells[r][c].length());
             }
         }
-
 
         StringBuilder text = new StringBuilder();
         for (int r = 0; r < numRows; r++) {
@@ -479,5 +478,4 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         }
         return text.toString();
     }
-    */
 }

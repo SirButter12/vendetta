@@ -17,44 +17,44 @@ import linear.vendetta.vendetta.API.Vector;
  */
 public class Interpreter {
     private static HashMap<String, Object> memory = new HashMap();
-    private static final Set<String> CONSTANTS = Set.of("pi", "e");
+    private static final Set<String> CONSTANTS = Set.of("pi", "e", "i");
     
     static {
         // Vectores
-        memory.put("A", new Vector(List.of(1, 2, 3)));
-        memory.put("B", new Vector(List.of(2, -1, 3)));
-        memory.put("C", new Vector(List.of(-1, 2)));
-        memory.put("D", new Vector(List.of(-1, 2)));
+        memory.put("A", new Vector(List.of(1.0, 2.0, 3.0)));
+        memory.put("B", new Vector(List.of(2.0, -1.0, 3.0)));
+        memory.put("C", new Vector(List.of(-1.0, 2.0)));
+        memory.put("D", new Vector(List.of(0.0, 1.0)));
 
         // Matrices
         memory.put("M1", Matrix.build(List.of(
-                new Vector(List.of(1, 2, 6)),
-                new Vector(List.of(3, -2, 3)),
-                new Vector(List.of(0, -1, 5))
+                new Vector(List.of(1.0, 2.0, 6.0)),
+                new Vector(List.of(3.0, -2.0, 3.0)),
+                new Vector(List.of(0.0, -1.0, 5.0))
         )));
         
         memory.put("M2", Matrix.build(List.of(
-                new Vector(List.of(6, 7, 6)),
-                new Vector(List.of(4, -8, 6)),
-                new Vector(List.of(0, -1, 9))
+                new Vector(List.of(6.0, 7.0, 6.0)),
+                new Vector(List.of(4.0, -8.0, 6.0)),
+                new Vector(List.of(0.0, -1.0, 9.0))
         )));
         
         
         memory.put("I", Matrix.build(List.of(
-                new Vector(List.of(1, 0, 0)),
-                new Vector(List.of(0, 1, 0)),
-                new Vector(List.of(0, 0, 1))
+                new Vector(List.of(1.0, 0.0, 0.0)),
+                new Vector(List.of(0.0, 1.0, 0.0)),
+                new Vector(List.of(0.0, 0.0, 1.0))
         )));
         
         memory.put("i", Matrix.build(List.of(
-                new Vector(List.of(0, -1)),
-                new Vector(List.of(1, 0))
+                new Vector(List.of(0.0, -1.0)),
+                new Vector(List.of(1.0, 0.0))
         )));
         
         memory.put("M3", Matrix.build(List.of(
-                new Vector(List.of(1, 2, 3, 4)),
-                new Vector(List.of(1, 2, 3, 4)),
-                new Vector(List.of(1, 2, 3, 4))
+                new Vector(List.of(1.0, 2.0, 3.0, 4.0)),
+                new Vector(List.of(1.0, 2.0, 3.0, 4.0)),
+                new Vector(List.of(1.0, 2.0, 3.0, 4.0))
         )));   
           
     

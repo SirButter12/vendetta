@@ -126,7 +126,7 @@ public class Evaluator {
     }
     
     private static Object det(List<Object> args) {
-        expectArgs("det", args, 2);
+        expectArgs("det", args, 1);
         
         if (args.get(0) instanceof Matrix m) {
             
