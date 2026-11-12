@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import linear.vendetta.vendetta.API.Matrix;
+import linear.vendetta.vendetta.API.Vector;
 
 /**
  *
@@ -18,7 +20,43 @@ public class Interpreter {
     private static final Set<String> CONSTANTS = Set.of("pi", "e");
     
     static {
-      
+        // Vectores
+        memory.put("A", new Vector(List.of(1, 2, 3)));
+        memory.put("B", new Vector(List.of(2, -1, 3)));
+        memory.put("C", new Vector(List.of(-1, 2)));
+        memory.put("D", new Vector(List.of(-1, 2)));
+
+        // Matrices
+        memory.put("M1", Matrix.build(List.of(
+                new Vector(List.of(1, 2, 6)),
+                new Vector(List.of(3, -2, 3)),
+                new Vector(List.of(0, -1, 5))
+        )));
+        
+        memory.put("M2", Matrix.build(List.of(
+                new Vector(List.of(6, 7, 6)),
+                new Vector(List.of(4, -8, 6)),
+                new Vector(List.of(0, -1, 9))
+        )));
+        
+        
+        memory.put("I", Matrix.build(List.of(
+                new Vector(List.of(1, 0, 0)),
+                new Vector(List.of(0, 1, 0)),
+                new Vector(List.of(0, 0, 1))
+        )));
+        
+        memory.put("i", Matrix.build(List.of(
+                new Vector(List.of(0, -1)),
+                new Vector(List.of(1, 0))
+        )));
+        
+        memory.put("M3", Matrix.build(List.of(
+                new Vector(List.of(1, 2, 3, 4)),
+                new Vector(List.of(1, 2, 3, 4)),
+                new Vector(List.of(1, 2, 3, 4))
+        )));   
+          
     
         
         memory.put("pi", Math.PI);
