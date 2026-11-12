@@ -92,31 +92,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     
 
     
-    public static Matrix multiply(Matrix m1, Matrix m2) {
-        if (m1.getNumCols() != m2.getNumRows()) {
-            throw new IllegalArgumentException("Not valid sizes");
-        }
-        
-        List<Vector> vectorsm1 = m1.getRows();
-        List<Vector> vectorsm2 = m2.transpose().getRows();
-        List<Vector> resultm = new ArrayList<Vector>();
-        List<Double> rowResult = new ArrayList<Double>();
-        
-        for (int i = 0; i < vectorsm1.size(); i++) {
-            Vector row = vectorsm1.get(i);
-            
-            for (int j = 0; j < vectorsm2.size(); j++) {
-                Vector column = vectorsm2.get(j);
-                
-                rowResult.add(row.dotProduct(column));
-            }
-            
-            resultm.add( new Vector(rowResult));
-            rowResult.clear();
-        }
-        
-        return Matrix.build(resultm);
-    }
+    
     
     public Matrix getSubMatrix(int i , int j) {
         List<Vector> equations = new ArrayList<>();
@@ -129,45 +105,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     }
 
 
-    @Override
-    public Matrix add(Matrix m) {
-        if (this.getNumCols() != m.getNumCols() || this.getNumRows() != m.getNumRows()) {
-            throw new IllegalArgumentException("invalid sum sizes");
-        }
-        
-        List<Vector> vectors1 = this.getRows();
-        List<Vector> vectors2 = m.getRows();
-        List<Vector> resultm = new ArrayList<Vector>();
-        
-        for (int i = 0; i < vectors1.size(); i++) {
-            resultm.add(vectors1.get(i).add(vectors2.get(i)));
-        }
-        
-        return Matrix.build(resultm);
-    }
-
-
-    @Override
-    public Matrix subtract(Matrix a) {
-        return this.add(a.scalarMult(-1)); 
-    }
-
-
-    @Override
-    public Matrix scalarMult(double k) {
-        List<Vector> vectors = this.getRows();
-        List<Vector> resultm = new ArrayList<Vector>();
-        
-        for(int i = 0; i < vectors.size(); i++) {
-            resultm.add(vectors.get(i).scalarMult(k));
-        }
-        
-        return Matrix.build(resultm);
-    }
     
-    public List<Vector> getRows() {
-        return List.copyOf(rows);
-    }    
     
     
  
@@ -270,9 +208,71 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     
     
     
+    public static Matrix multiply(Matrix m1, Matrix m2) {
+        if (m1.getNumCols() != m2.getNumRows()) {
+            throw new IllegalArgumentException("Not valid sizes");
+        }
+        
+        List<Vector> vectorsm1 = m1.getRows();
+        List<Vector> vectorsm2 = m2.transpose().getRows();
+        List<Vector> resultm = new ArrayList<Vector>();
+        List<Double> rowResult = new ArrayList<Double>();
+        
+        for (int i = 0; i < vectorsm1.size(); i++) {
+            Vector row = vectorsm1.get(i);
+            
+            for (int j = 0; j < vectorsm2.size(); j++) {
+                Vector column = vectorsm2.get(j);
+                
+                rowResult.add(row.dotProduct(column));
+            }
+            
+            resultm.add( new Vector(rowResult));
+            rowResult.clear();
+        }
+        
+        return Matrix.build(resultm);
+    }
     
+    @Override
+    public Matrix add(Matrix m) {
+        if (this.getNumCols() != m.getNumCols() || this.getNumRows() != m.getNumRows()) {
+            throw new IllegalArgumentException("invalid sum sizes");
+        }
+        
+        List<Vector> vectors1 = this.getRows();
+        List<Vector> vectors2 = m.getRows();
+        List<Vector> resultm = new ArrayList<Vector>();
+        
+        for (int i = 0; i < vectors1.size(); i++) {
+            resultm.add(vectors1.get(i).add(vectors2.get(i)));
+        }
+        
+        return Matrix.build(resultm);
+    }
+
+
+    @Override
+    public Matrix subtract(Matrix a) {
+        return this.add(a.scalarMult(-1)); 
+    }
+
+
+    @Override
+    public Matrix scalarMult(double k) {
+        List<Vector> vectors = this.getRows();
+        List<Vector> resultm = new ArrayList<Vector>();
+        
+        for(int i = 0; i < vectors.size(); i++) {
+            resultm.add(vectors.get(i).scalarMult(k));
+        }
+        
+        return Matrix.build(resultm);
+    }
     
-    
+    public List<Vector> getRows() {
+        return List.copyOf(rows);
+    }    
     
     /**
      * Matrix builder. Each Vector is one row; the size of its
