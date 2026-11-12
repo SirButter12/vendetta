@@ -1,0 +1,16 @@
+DA RULES
+
+1. NEVER WORK ON A FILE YOU ARE NOT ASSIGNED TO, unless really necessary.
+   (Current work division: Ian -> API, Mathews -> Controllers, Adrian -> FXML)
+
+2. Pull before working.
+
+3. If for whatever reason you have to mess around with someone else's code, tell them.
+
+4. Read whatever updates there are on Instagram.
+
+5. Don't feed it after midnight.
+
+6. Don't let it get wet.
+
+7. Do not expose it to direct sunlight.
