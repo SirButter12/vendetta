@@ -255,6 +255,10 @@ public class Evaluator {
         if (o1 instanceof Matrix m1 && o2 instanceof Matrix m2) {
             return Matrix.multiply(m1, m2);
         }
+        
+        if (o1 instanceof Matrix m && o2 instanceof Vector v) {
+            return Matrix.multiply(m, v);
+        }
              
         throw new CommandException("Cannot multiply " + o1.getClass().getSimpleName() + " by " + o2.getClass().getSimpleName());
     }

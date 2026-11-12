@@ -234,6 +234,12 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         return Matrix.build(resultm);
     }
     
+    public static Vector multiply(Matrix m1, Vector v) {
+        Matrix m2 = Matrix.convertToMatrix(v);
+        
+        return Vector.convertToVector(Matrix.multiply(m1, m2));
+    }
+    
     public static Matrix convertToMatrix(Vector v) {
         return Matrix.build(List.of(v));
     }
