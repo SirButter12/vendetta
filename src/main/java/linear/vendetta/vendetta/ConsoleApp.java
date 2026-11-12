@@ -45,10 +45,6 @@ public class ConsoleApp {
                 }
                 case "help" -> printHelp();
                 case "memory" -> printMemory();
-                case "clear" -> {
-                    Interpreter.getMemory().clear();
-                    System.out.println("Memory cleared.");
-                }
                 default -> runCommand(line);
             }
         }
@@ -123,7 +119,6 @@ public class ConsoleApp {
 
         System.out.println("\n--- Console commands ---");
         System.out.println("  memory           List every stored variable and its value");
-        System.out.println("  clear            Empty the memory");
         System.out.println("  help             Show this message");
         System.out.println("  exit             Close the program");
         System.out.println("======================================");
