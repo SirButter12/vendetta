@@ -212,25 +212,25 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         if (m1.getNumCols() != m2.getNumRows()) {
             throw new IllegalArgumentException("Not valid sizes");
         }
-        
+
         List<Vector> vectorsm1 = m1.getRows();
         List<Vector> vectorsm2 = m2.transpose().getRows();
         List<Vector> resultm = new ArrayList<Vector>();
         List<Double> rowResult = new ArrayList<Double>();
-        
+
         for (int i = 0; i < vectorsm1.size(); i++) {
             Vector row = vectorsm1.get(i);
-            
+
             for (int j = 0; j < vectorsm2.size(); j++) {
                 Vector column = vectorsm2.get(j);
-                
+
                 rowResult.add(row.dotProduct(column));
             }
-            
+
             resultm.add( new Vector(rowResult));
             rowResult.clear();
         }
-        
+
         return Matrix.build(resultm);
     }
     
