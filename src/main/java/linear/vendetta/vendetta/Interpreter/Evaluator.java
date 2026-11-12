@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package linear.vendetta.vendetta.Interpreter;
 
 import java.util.ArrayList;
@@ -257,7 +253,7 @@ public class Evaluator {
         }
         
         if (o1 instanceof Matrix m1 && o2 instanceof Matrix m2) {
-            return m1.multiply(m2);
+            return Matrix.multiply(m1, m2);
         }
              
         throw new CommandException("Cannot multiply " + o1.getClass().getSimpleName() + " by " + o2.getClass().getSimpleName());
@@ -273,7 +269,7 @@ public class Evaluator {
         }
         
         if (o1 instanceof Matrix m1 && o2 instanceof Matrix m2) {
-            return m1.multiply(Matrix.inverse(m2));
+            return Matrix.multiply(m1, Matrix.inverse(m2));
         }
      
         throw new CommandException("Cannot divide " + o1.getClass().getSimpleName() + " by " + o2.getClass().getSimpleName());

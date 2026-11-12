@@ -92,12 +92,30 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     
 
 
-    public static Matrix multiply(Matrix m) {
-        return Matrix.build(List.of(
-                new Vector(List.of(1, 0, 0)),
-                new Vector(List.of(0, 1, 0)),
-                new Vector(List.of(0, 0, 1))
-        ));
+    public static Matrix multiply(Matrix m1, Matrix m2) {
+        if (m1.getNumCols() == m2.getNumRows()) {
+            throw new RuntimeException("Not valid sizes");
+        }
+        
+        List<Vector> vectorsm1 = m1.getRows();
+        List<Vector> vectorsm2 = m2.transpose().getRows();
+        List<Vector> resultm = new ArrayList<Vector>();
+        List<Double> rowResult = new ArrayList<Double>();
+        
+        for (int i = 0; i < vectorsm1.size(); i++) {
+            Vector row = vectorsm1.get(i);
+            
+            for (int j = 0; j < vectorsm2.size(); j++) {
+                Vector column = vectorsm2.get(i);
+                
+                rowResult.add(row.dotProduct(column));
+            }
+            
+            resultm.add( new Vector(rowResult));
+            rowResult.clear();
+        }
+        
+        return Matrix.build(resultm);
     }
     
     public Matrix getSubMatrix(int i , int j) {
@@ -136,6 +154,9 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         ));
     }
     
+    public List<Vector> getRows() {
+        return List.copyOf(rows);
+    }    
     
     
  
@@ -408,7 +429,8 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         return build(transposed);
     }
         
-    @Override
+    /*
+       @Override
     public String toString() {
         int numRows = size[0];
         int numCols = size[1];
@@ -436,6 +458,5 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         }
         return text.toString();
     }
-    
-    
+    */
 }
