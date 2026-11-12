@@ -3,24 +3,20 @@ package linear.vendetta.vendetta;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import linear.vendetta.vendetta.API.Matrix;
-import linear.vendetta.vendetta.API.Vector;
 import linear.vendetta.vendetta.Interpreter.CompiledResult;
 import linear.vendetta.vendetta.Interpreter.Interpreter;
 
 /**
- * Version de consola para probar el interprete sin JavaFX.
- * Usa la misma entrada que usara la interfaz: Interpreter.compile(List<String>).
- *
- * Sin argumentos: modo interactivo. Con argumentos: cada argumento se ejecuta como un comando.
- *   ej: java ... ConsoleApp "A = Matrix(2, 2)" "det(A)"
+ * Console version for testing
+ * 
+ * @author Ian
  */
 public class ConsoleApp {
 
     public static void main(String[] args) {
         if (args.length > 0) {
             for (String line : args) {
-                System.out.println(">> " + line);
+                System.out.println(":v " + line);
                 runCommand(line);
             }
             return;
@@ -30,9 +26,8 @@ public class ConsoleApp {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.print("\n>> ");
+            System.out.print("\n:v ");
 
-            // Ctrl+D / Ctrl+Z termina la entrada
             if (!scanner.hasNextLine()) {
                 break;
             }
@@ -54,12 +49,12 @@ public class ConsoleApp {
                     Interpreter.getMemory().clear();
                     System.out.println("Memory cleared.");
                 }
+                default -> runCommand(line);
             }
         }
         scanner.close();
     }
 
-    /** Manda un comando al interprete. Cualquier error se atrapa para que el programa siga. */
     private static void runCommand(String command) {
         try {
             List<CompiledResult> results = Interpreter.compile(List.of(command));
@@ -114,11 +109,11 @@ public class ConsoleApp {
         System.out.println("  inv(M)           Inverse (square matrices only)");
         System.out.println("  adj(M)           Adjugate");
         System.out.println("  trans(M)         Transpose");
-        System.out.println("  triangulize(M)   Triangular form (if implemented)");
+        System.out.println("  triangulize(M)   Triangular form");
         System.out.println("  Matrix(n, m)     New n x m matrix filled with zeros");
-        System.out.println("  solveSystem(...) Solve a system of equations (coming soon)");
+        System.out.println("  solveSystem(m, v) Solve a system of equations (coming soon)");
 
-        System.out.println("\n--- Number functions (reserved, if implemented) ---");
+        System.out.println("\n--- Number functions ---");
         System.out.println("  sin cos tan sec csc cot ln sqrt");
 
         System.out.println("\n--- Variables ---");
@@ -127,8 +122,6 @@ public class ConsoleApp {
         System.out.println("  Functions can be combined: det(trans(M)), dot(A + B, A)");
 
         System.out.println("\n--- Console commands ---");
-        System.out.println("  set A i j value  Fill one cell of a matrix (0-based)");
-        System.out.println("  set v i value    Fill one component of a vector (0-based)");
         System.out.println("  memory           List every stored variable and its value");
         System.out.println("  clear            Empty the memory");
         System.out.println("  help             Show this message");
@@ -136,7 +129,7 @@ public class ConsoleApp {
         System.out.println("======================================");
     }
 
-    /** Imprime cada variable de la memoria con su toString(). */
+ 
     private static void printMemory() {
         Map<String, Object> memory = Interpreter.getMemory();
 
