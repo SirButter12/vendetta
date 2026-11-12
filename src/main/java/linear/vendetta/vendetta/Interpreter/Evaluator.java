@@ -84,11 +84,9 @@ public class Evaluator {
     }    
     
     private static Object adj(List<Object> args) {
+        expectArgs("adj", args, 1);
+        
         if (args.get(0) instanceof Matrix m) {
-            if (args.size() != 1) {
-                throw new CommandException("Invalid argument, amount not compatible");
-            }
-            
             return Matrix.adj(m);
         }
         
@@ -96,11 +94,9 @@ public class Evaluator {
     }
     
     private static Object inv(List<Object> args) {
-        if (args.get(0) instanceof Matrix m) {
-            if (args.size() != 1) {
-                throw new CommandException("Invalid argument, amount not compatible");
-            }
-            
+        expectArgs("inv", args, 1);
+        
+        if (args.get(0) instanceof Matrix m) {    
             return Matrix.inverse(m);
         }
         
@@ -108,10 +104,8 @@ public class Evaluator {
     }
 
     private static Object trans(List<Object> args) {
+        expectArgs("trans", args, 1);
         if (args.get(0) instanceof Matrix m) {
-            if (args.size() != 1) {
-                throw new CommandException("Invalid argument, amount not compatible");
-            }
             
             return m.transpose();
         }
@@ -120,10 +114,9 @@ public class Evaluator {
     }
     
     private static Object det(List<Object> args) {
+        expectArgs("det", args, 2);
+        
         if (args.get(0) instanceof Matrix m) {
-            if (args.size() != 1) {
-                throw new CommandException("Invalid argument, amount not compatible");
-            }
             
             return m.getDeterminant();
         }
@@ -132,9 +125,7 @@ public class Evaluator {
     }
     
     private static Object dot(List<Object> args) {
-        if (args.size() != 2) {
-                throw new CommandException("Invalid argument, amount not compatible");
-            }
+        expectArgs("dot", args, 2);
         
         if (args.get(0) instanceof Vector v1 && args.get(1) instanceof Vector v2) {
             return v1.dotProduct(v2);
@@ -152,10 +143,8 @@ public class Evaluator {
     }
     
     private static Object cross(List<Object> args) {
+        expectArgs("cross", args, 2);
         if (args.get(0) instanceof Vector v1 && args.get(1) instanceof Vector v2) {
-            if (args.size() != 2) {
-                throw new CommandException("Invalid argument, amount not compatible");
-            }
             
             if (v1.getDimension() == 2 && v2.getDimension() == 2) {
                 return v1.cross2D(v2);
@@ -172,10 +161,9 @@ public class Evaluator {
     }
     
     private static Object project(List<Object> args) {
+        expectArgs("project", args, 2);
         if (args.get(0) instanceof Vector v1 && args.get(1) instanceof Vector v2) {
-            if (args.size() != 2) {
-                throw new CommandException("Invalid argument, amount not compatible");
-            }
+            
             
             return v1.projectOn(v2);
         }
