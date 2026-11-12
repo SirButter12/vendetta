@@ -50,50 +50,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         this.determinant = m.determinant;
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
- 
-    
-
-    
-    
+    //--TO BE IMPLEMENTED--
     
     public Matrix getSubMatrix(int i , int j) {
         List<Vector> equations = new ArrayList<>();
@@ -104,7 +61,10 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     public static Matrix adj(Matrix m) {
         return m;
     }
-
+    
+    
+    //--ALREADY WORKING AND TESTED--
+    
     public static Matrix pow(Matrix m, double k) {
         if (!(k % 1 == 0)) {
             throw new IllegalArgumentException("Matrix powers only work with integer powers!");
@@ -136,108 +96,6 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
         return Matrix.build(rows);
     }
-    
-    
-    
- 
-    
- 
-    
- 
- 
-   
-    
- 
-    
-    
-
-
-    
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     public static Matrix multiply(Matrix m1, Matrix m2) {
         if (m1.getNumCols() != m2.getNumRows()) {
