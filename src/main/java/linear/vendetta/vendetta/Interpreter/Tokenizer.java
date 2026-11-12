@@ -32,7 +32,7 @@ public class Tokenizer {
         tokenMapping.put(')', TokenType.RPAREN);
         tokenMapping.put('/', TokenType.SLASH);
         tokenMapping.put('*', TokenType.STAR);
-        tokenMapping.put('^', tokenType.EXP);
+        tokenMapping.put('^', TokenType.EXP);
     }
     
     public Tokenizer(String command) {
