@@ -157,12 +157,18 @@ public class Evaluator {
     }
     
     private static Object gaussJordan(List<Object> args) {
-        expectArgs("solveSystem", args, 2);
+        expectArgs("gaussJordan", args, 2);
                 
         if (args.get(0) instanceof Matrix m && args.get(1) instanceof Vector v) {        
             SystemMatrix systemMatrix = new SystemMatrix(m, v);
             
-            return systemMatrix.gaussJordan();
+            Vector s = systemMatrix.gaussJordan();
+            
+            for (String step: systemMatrix.getGaussSteps()) {
+                System.out.println(step);
+            }    
+            
+            return s;
         }
         
         throw new CommandException("Invalid arguments");

@@ -4,12 +4,16 @@
  */
 package linear.vendetta.vendetta.API;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author ian
  */
 public class SystemMatrix extends Matrix{
     private TransformableVector eqVector;
+    private static final double EPS = 0.00001;
     
     public SystemMatrix(Matrix m, Vector v) {
         super(m);
@@ -22,9 +26,70 @@ public class SystemMatrix extends Matrix{
         eqVector = new TransformableVector(v);
     }
    
-    
     public Vector gaussJordan() {
-        return null;
+        int m = getNumRows();
+        int n = getNumCols();
+
+        TransformableVector original = new TransformableVector(eqVector);
+        Matrix triang;
+        TransformableVector b;
+        try {
+            triang = toTriangle();
+            b = eqVector;
+        } finally {
+            eqVector = original;
+        }
+
+        for (int r = 0; r < m; r++) {
+            if (isZeroRow(triang, r) && Math.abs(b.get(r)) > EPS) {
+                throw new MultipleOrNoSolutionException("The system has no solution (row " + r
+                        + " reads 0 = " + Vector.formatNumber(b.get(r)) + ").");
+            }
+        }
+
+        if (m < n) {
+            throw new MultipleOrNoSolutionException("The system has infinitely many solutions ("
+                    + n + " unknowns but only " + m + " equations).");
+        }
+        for (int i = 0; i < n; i++) {
+            if (Math.abs(triang.get(i, i)) < EPS) {
+                throw new MultipleOrNoSolutionException(
+                        "The system has infinitely many solutions (x_" + i + " is free).");
+            }
+        }
+
+        for (int col = n - 1; col >= 0; col--) {
+            double pivot = triang.get(col, col);
+            if (pivot != 1.0) {
+                gaussSteps.add(triang.rowMultiply(1.0 / pivot, col));
+                b.rowMultiply(1.0 / pivot, col);
+                triang.rows.get(col).set(col, 1.0);       
+            }
+
+            for (int r = 0; r < col; r++) {
+                double factor = triang.get(r, col);
+                if (factor != 0.0) {
+                    gaussSteps.add(triang.rowComp(r, col, -factor));
+                    b.rowComp(r, col, -factor);
+                    triang.rows.get(r).set(col, 0.0);      
+                }
+            }
+        }
+
+        List<Double> solution = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) {
+            solution.add(b.get(i));
+        }
+        return new Vector(solution);
+    }
+
+    private static boolean isZeroRow(Matrix mat, int row) {
+        for (int c = 0; c < mat.getNumCols(); c++) {
+            if (Math.abs(mat.get(row, c)) > EPS) {
+                return false;
+            }
+        }
+        return true;
     }
     
     
