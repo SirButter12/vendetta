@@ -17,8 +17,20 @@ public class Tokenizer {
     private String command;
     private List<Token> tokens = new ArrayList<>();
     private static final List<String> reservedWords = List.of(
-            "adj","inv","trans","det","dot", "cross", "project", "solveSystem", "Vector", "Matrix", "triangulize",
-            "sin", "cos", "tan", "sec", "csc", "cot", "ln", "sqrt"
+            //Matrix functions
+            "adj","inv","trans","det", "triangulize",
+            
+            //Vector
+            "dot", "cross", "project", "solveSystem", 
+            
+            //Constructors
+             "Vector", "Matrix",
+             
+            //Math
+            "sin", "cos", "tan", "sec", "csc", "cot",        
+            "arcsin", "arccos", "arctan", "arcsec", "arccsc", "arccot",
+            
+            "ln", "sqrt", "log", "log10", "mod"
     );
     private static HashMap<Character, TokenType> tokenMapping = new HashMap();
      

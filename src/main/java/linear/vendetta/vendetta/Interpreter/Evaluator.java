@@ -83,14 +83,25 @@ public class Evaluator {
             case "Vector" -> vector(args);
             case "Matrix" -> matrix(args);
             case "triangulize" -> triangulize(args);
+                
+            //MATH    
             case "sin" -> sin(args);
             case "cos" -> cos(args);
             case "tan" -> tan(args);   
             case "sec" -> sec(args);
             case "csc" -> csc(args);
             case "cot" -> cot(args);
+            case "arcsin" -> arcsin(args);
+            case "arccos" -> arccos(args);
+            case "arctan" -> arctan(args);
+            case "arcsec" -> arcsec(args);
+            case "arccsc" -> arccsc(args);
+            case "arccot" -> arccot(args);
             case "ln" -> ln(args);
             case "sqrt" -> sqrt(args);
+            case "log" -> log(args);
+            case "log10" -> log10(args);
+            case "mod" -> mod(args);
                 
                 
             default -> throw new IllegalStateException("Unexpected value: " + (node.text()));
