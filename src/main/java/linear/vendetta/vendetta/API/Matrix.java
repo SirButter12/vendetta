@@ -10,10 +10,10 @@ import java.util.List;
  * @author Matthew, Ian, Adrian
  */
 public class Matrix implements operable<Matrix>, elementalOperations {
-    private List<Vector> rows;
-    private int[] size = new int[2];
-    private double determinant;
-    private double detSign;
+    protected List<Vector> rows;
+    protected int[] size = new int[2];
+    protected double determinant;
+    protected double detSign;
 
 
        
