@@ -21,12 +21,57 @@ public class SystemMatrix extends Matrix{
 
         eqVector = new TransformableVector(v);
     }
+   
     
-    /*
     public Vector gaussJordan() {
-        
+        return null;
     }
-    */
+    
+    
+    @Override
+    public Matrix toTriangle() {
+        Matrix triang = new Matrix(this);
+        int m = triang.getNumRows();
+        int n = triang.getNumCols();
+
+        gaussSteps.clear();     // otherwise every call kept adding steps to the old ones
+        detSign = 1.0;
+        int pivotRow = 0;
+
+        for (int col = 0; col < n && pivotRow < m; col++) {
+            int best = pivotRow;
+            for (int r = pivotRow + 1; r < m; r++) {
+                if (Math.abs(triang.get(r, col)) > Math.abs(triang.get(best, col))) {
+                    best = r;
+                }
+            }
+
+            if (Math.abs(triang.get(best, col)) < 0.00001) {
+                continue;
+            }
+
+            if (best != pivotRow) {
+                eqVector.rowSwap(pivotRow, best);
+                gaussSteps.add(triang.rowSwap(pivotRow, best));
+                detSign *= -1.0;
+            }
+
+            double pivot = triang.get(pivotRow, col);
+            for (int r = pivotRow + 1; r < m; r++) {
+                double factor = triang.get(r, col) / pivot;
+                if (factor != 0.0) {
+                    eqVector.rowComp(r, pivotRow, -factor);
+                    gaussSteps.add(triang.rowComp(r, pivotRow, -factor));
+                    triang.rows.get(r).set(col, 0.0);   // exact zero, avoids 1e-16 leftovers
+                }
+            }
+
+            pivotRow++;
+        }
+
+        return triang;
+    }
+   
 
     public Vector solve() {
         if (!isSquare()) {
