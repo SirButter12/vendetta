@@ -16,9 +16,35 @@ import linear.vendetta.vendetta.Interpreter.Token.TokenType;
 public class Parser {
     private final List<Token> tokens;
     private int pos = 0;
+    private static final List<TokenType> constStructure = List.of(
+            Token.TokenType.NAME,
+            Token.TokenType.EQUALS,
+            Token.TokenType.CONSTRUCTOR,
+            Token.TokenType.LPAREN        
+            );
 
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
+    }
+    
+    private boolean matchesConstTokens() {
+        for (int i = 0; i < 4; i ++) {
+            if (tokens.get(i).tokenType != constStructure.get(i)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private boolean containsConst() {
+        for (Token t: tokens) {
+            if (t.tokenType == Token.TokenType.CONSTRUCTOR) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     private Token peek() {                          
@@ -41,6 +67,8 @@ public class Parser {
     }
 
     public Node parse() {
+        
+        
         Node tree = parseStatement();
         if (peek().tokenType != TokenType.END) {   
             throw new CommandException("Unexpected '" + peek().oriText + "'");

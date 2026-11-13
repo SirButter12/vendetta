@@ -80,8 +80,6 @@ public class Evaluator {
             case "cross" -> cross(args);    
             case "project" -> project(args);
             case "solveSystem" -> solveSystem(args);
-            case "Vector" -> vector(args);
-            case "Matrix" -> matrix(args);
             case "triangulize" -> triangulize(args);
                 
             //MATH    

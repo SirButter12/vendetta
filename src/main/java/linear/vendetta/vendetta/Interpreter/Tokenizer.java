@@ -16,21 +16,22 @@ import linear.vendetta.vendetta.Interpreter.Token.TokenType;
 public class Tokenizer {
     private String command;
     private List<Token> tokens = new ArrayList<>();
-    private static final List<String> reservedWords = List.of(
+    private static final List<String> functions = List.of(
             //Matrix functions
             "adj","inv","trans","det", "triangulize",
             
             //Vector
             "dot", "cross", "project", "solveSystem", 
-            
-            //Constructors
-             "Vector", "Matrix",
              
             //Math
             "sin", "cos", "tan", "sec", "csc", "cot",        
             "arcsin", "arccos", "arctan", "arcsec", "arccsc", "arccot",
             
             "ln", "sqrt", "log", "log10", "mod"
+    );
+    
+    private static final List<String> constructors = List.of(
+            "Matrix", "Vector"
     );
     private static HashMap<Character, TokenType> tokenMapping = new HashMap();
      
@@ -85,8 +86,10 @@ public class Tokenizer {
             return;
         }
         
-        if (reservedWords.contains(str)) {
+        if (functions.contains(str)) {
             tokens.add(new Token(str, Token.TokenType.FUNCT));
+        } else if(constructors.contains(str)) {
+            tokens.add(new Token(str, Token.TokenType.CONSTRUCTOR));
         } else if (str.matches("^[a-zA-Z][a-zA-Z0-9]*$")) {
             tokens.add(new Token(str, Token.TokenType.NAME));
         } else if (str.matches("^\\d+(\\.\\d+)?$")) {

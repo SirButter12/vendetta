@@ -78,6 +78,10 @@ public class Interpreter {
         return results;
     }
     
+    public static void prepareVariables() {
+        
+    }
+    
     public static void assignToMemory(String name, Object obj) {
         if (CONSTANTS.contains(name)) {
             throw new CommandException(name + " is a constant and cannot be reassigned");
