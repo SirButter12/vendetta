@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.lang.Math;
 import linear.vendetta.vendetta.API.Matrix;
+import linear.vendetta.vendetta.API.SystemMatrix;
 import linear.vendetta.vendetta.API.Vector;
 import linear.vendetta.vendetta.Interpreter.Node.NodeKind;
 import static linear.vendetta.vendetta.Interpreter.evaluators.MathEvaluator.*;
@@ -116,6 +117,7 @@ public class Evaluator {
             case "cross" -> cross(args);    
             case "project" -> project(args);
             case "solveSystem" -> solveSystem(args);
+            case "gaussJordan" -> gaussJordan(args);    
             case "triangulize" -> triangulize(args);
                 
             //MATH    
@@ -143,8 +145,27 @@ public class Evaluator {
     }    
     
     private static Object solveSystem(List<Object> args) {
-        //to be done
-        return null;
+        expectArgs("solveSystem", args, 2);
+                
+        if (args.get(0) instanceof Matrix m && args.get(1) instanceof Vector v) {        
+            SystemMatrix systemMatrix = new SystemMatrix(m, v);
+            
+            return systemMatrix.solve();
+        }
+        
+        throw new CommandException("Invalid arguments");
+    }
+    
+    private static Object gaussJordan(List<Object> args) {
+        expectArgs("solveSystem", args, 2);
+                
+        if (args.get(0) instanceof Matrix m && args.get(1) instanceof Vector v) {        
+            SystemMatrix systemMatrix = new SystemMatrix(m, v);
+            
+            return systemMatrix.gaussJordan();
+        }
+        
+        throw new CommandException("Invalid arguments");
     }
         
     public static void expectArgs(String fn, List<Object> args, int n) {

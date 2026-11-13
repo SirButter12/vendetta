@@ -21,8 +21,11 @@ public class Tokenizer {
             "adj","inv","trans","det", "triangulize",
             
             //Vector
-            "dot", "cross", "project", "solveSystem", 
-             
+            "dot", "cross", "project",  
+            
+            //System of equations
+            "solveSystem", "gaussJordan",
+            
             //Math
             "sin", "cos", "tan", "sec", "csc", "cot",        
             "arcsin", "arccos", "arctan", "arcsec", "arccsc", "arccot",
