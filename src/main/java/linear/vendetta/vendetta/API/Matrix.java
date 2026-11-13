@@ -307,7 +307,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         
         this.determinant = determinant * -1;
         
-        return String.format("R_%i <-> R_%i\n", idx1, idx2);
+        return String.format("R_%d <-> R_%d\n", idx1, idx2);
     }
 
 
@@ -317,7 +317,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         Vector source = this.rows.get(idx2);
         
         this.rows.set(idx1, target.add(source.scalarMult(k)));
-        return String.format("R_%i -> R_%i + %d * R_%i\n", idx1, k, idx2);
+        return String.format("R_%d -> R_%d + %f * R_%d\n", idx1, k, idx2);
     }
     
     //--- Misc methods---
