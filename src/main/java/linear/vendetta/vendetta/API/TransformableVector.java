@@ -19,7 +19,7 @@ public class TransformableVector extends Vector implements elementalOperations {
     @Override
     public String rowMultiply(double a, int idx) {
         super.set(idx, this.values.get(idx) * a);  
-        return String.format("R_%d -> R_%d * %f\n", idx, idx, a);
+        return String.format("R_%d -> R_%d * %s\n", idx, idx, Vector.formatNumber(a));
     }
 
     @Override
@@ -31,6 +31,6 @@ public class TransformableVector extends Vector implements elementalOperations {
     @Override
     public String rowComp(int idx1, int idx2, double k) {
         super.set(idx1, this.values.get(idx1) + this.values.get(idx2) * k);
-        return String.format("R_%d -> R_%d + %f * R_%d\n", idx1, k, idx2);
+        return String.format("R_%d -> R_%d + %s * R_%d\n", idx1, idx1, Vector.formatNumber(k) , idx2);
     }
 }
