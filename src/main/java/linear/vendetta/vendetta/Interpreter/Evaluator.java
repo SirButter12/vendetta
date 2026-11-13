@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.lang.Math;
+import linear.vendetta.vendetta.API.Matrix;
+import linear.vendetta.vendetta.API.Vector;
 import linear.vendetta.vendetta.Interpreter.Node.NodeKind;
 import static linear.vendetta.vendetta.Interpreter.evaluators.MathEvaluator.*;
 import static linear.vendetta.vendetta.Interpreter.evaluators.MatrixEvaluator.*;
@@ -28,9 +30,44 @@ public class Evaluator {
                 
             case NodeKind.NAME -> lookup(root.text());  
                 
-            case NodeKind.NUMBER -> Double.parseDouble(root.text());                
+            case NodeKind.NUMBER -> Double.parseDouble(root.text());
+
+            case NodeKind.DECLARE -> throw new CommandException(
+                    "Matrix and Vector constructors are filled in by hand, they cannot be evaluated");
         };
-       
+
+    }
+
+    public static Object buildEmpty(Node declaration) {
+        Node constructor = declaration.children().get(0);
+
+        List<Object> sizes = new ArrayList<>();
+        for (Node child : constructor.children()) {
+            sizes.add(evaluateNode(child));
+        }
+
+        return constructor.text().equals("Matrix") ? matrix(sizes) : vector(sizes);
+    }
+
+    public static String describe(Node declaration) {
+        Node constructor = declaration.children().get(0);
+        List<String> sizes = new ArrayList<>();
+        for (Node child : constructor.children()) {
+            sizes.add(String.valueOf(toSize(evaluateNode(child))));
+        }
+        return constructor.text() + "(" + String.join(", ", sizes) + ")";
+    }
+
+    public static boolean sameShape(Object a, Object b) {
+        if (a instanceof Matrix m1 && b instanceof Matrix m2) {
+            return m1.getNumRows() == m2.getNumRows() && m1.getNumCols() == m2.getNumCols();
+        }
+
+        if (a instanceof Vector v1 && b instanceof Vector v2) {
+            return v1.getDimension() == v2.getDimension();
+        }
+
+        return false;
     }
     
     private static Object lookup(String name) {
@@ -63,7 +100,6 @@ public class Evaluator {
         };
     }
     
-    //"Adj","Inv","Trans","Det","Dot", "Cross", "Project", "SolveSystem", "Vector", "Matrix"
     private static Object call(Node node) {
         List<Object> args = new ArrayList<>();
         

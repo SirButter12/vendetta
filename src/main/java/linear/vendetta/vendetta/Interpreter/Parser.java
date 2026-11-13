@@ -28,7 +28,11 @@ public class Parser {
     }
     
     private boolean matchesConstTokens() {
-        for (int i = 0; i < 4; i ++) {
+        if (tokens.size() < constStructure.size()) {    // "Matrix" alone has only 2 tokens
+            return false;
+        }
+
+        for (int i = 0; i < constStructure.size(); i ++) {
             if (tokens.get(i).tokenType != constStructure.get(i)) {
                 return false;
             }
@@ -67,8 +71,13 @@ public class Parser {
     }
 
     public Node parse() {
-        
-        
+        if (containsConst()) {
+            if (!matchesConstTokens()) {
+                throw new CommandException("Matrix and Vector can only be used as  NAME = Matrix(n, m)  or  NAME = Vector(n)");
+            }
+            return parseConstructor();
+        }
+
         Node tree = parseStatement();
         if (peek().tokenType != TokenType.END) {   
             throw new CommandException("Unexpected '" + peek().oriText + "'");
@@ -77,6 +86,34 @@ public class Parser {
     }
     
     
+    private Node parseConstructor() {
+        String name = next().oriText;        // NAME
+        next();                              // =
+        String constructor = next().oriText; // Matrix / Vector
+        next();                              // (
+
+        String sizeError = "Sizes must be written as plain numbers, e.g. Matrix(2, 3)";
+        List<Node> sizes = new ArrayList<>();
+        sizes.add(new Node(NodeKind.NUMBER, expect(TokenType.NUMBER, sizeError).oriText, List.of()));
+
+        while (peek().tokenType == TokenType.COMMA) {
+            next();
+            sizes.add(new Node(NodeKind.NUMBER, expect(TokenType.NUMBER, sizeError).oriText, List.of()));
+        }
+
+        if (peek().tokenType == TokenType.END) {
+            throw new CommandException("Missing ')'");
+        }
+        expect(TokenType.RPAREN, sizeError);    // e.g. Matrix(1+1, 2)
+
+        if (peek().tokenType != TokenType.END) {
+            throw new CommandException("Unexpected '" + peek().oriText + "' after the constructor");
+        }
+
+        Node call = new Node(NodeKind.CALL, constructor, sizes);
+        return new Node(NodeKind.DECLARE, name, List.of(call));
+    }
+
     private Node parseFactor() {
         Token t = next();
 

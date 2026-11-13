@@ -36,7 +36,16 @@ public class Vector implements operable<Vector> {
      * or contains a null entry
      */
     public <T extends Number> Vector(List<T> values) {
-        this.values = validatedCopy((List<Double>) values);
+        // Convert each Number: the old (List<Double>) cast let List.of(1, 2)
+        // through and it blew up later with a ClassCastException
+        if (values == null) {
+            throw new IllegalArgumentException("A vector needs at least one component.");
+        }
+        List<Double> doubles = new ArrayList<>(values.size());
+        for (T component : values) {
+            doubles.add(component == null ? null : component.doubleValue());
+        }
+        this.values = validatedCopy(doubles);
         this.dimension = this.values.size();
     }
     
@@ -166,14 +175,14 @@ public class Vector implements operable<Vector> {
         
         return m.transpose().getRows().get(0);
     }
-      
-      /*
+
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Vector other)) return false;
         if (this.dimension != other.dimension) return false;
- 
+
         for (int i = 0; i < dimension; i++) {
             if (Double.compare(clean(values.get(i)), clean(other.values.get(i))) != 0) {
                 return false;
@@ -181,7 +190,6 @@ public class Vector implements operable<Vector> {
         }
         return true;
     }
-    */
       
     @Override
     public int hashCode() {

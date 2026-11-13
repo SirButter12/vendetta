@@ -4,6 +4,7 @@ import static java.lang.Double.NaN;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -21,14 +22,25 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     //---CONSTRUCTOR METHODS AND DETERMINANT---
     
     
-     // Private: go through build()
     private Matrix(List<Vector> rows) {
         if (rows == null || rows.isEmpty()) {
             throw new IllegalArgumentException("A matrix needs at least 1 row.");
         }
-        this.rows = rows;
+
+        int cols = Objects.requireNonNull(rows.get(0), "A matrix cannot contain null rows.").getDimension();
+
+        this.rows = new ArrayList<>();
+        for (Vector row : rows) {
+            Objects.requireNonNull(row, "A matrix cannot contain null rows.");
+            if (row.getDimension() != cols) {
+                throw new IllegalArgumentException("Every row must have " + cols
+                        + " columns, but one has " + row.getDimension() + ".");
+            }
+            this.rows.add(new Vector(row));
+        }
+
         this.size[0] = rows.size();
-        this.size[1] = rows.get(0).getDimension();
+        this.size[1] = cols;
         calcDeterminant();
     }
 
@@ -57,10 +69,11 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     
     /**
      * Matrix builder. Each Vector is one row; the size of its
-     * List is the number of columns.
+     * List is the number of columns. Every row must have the same size.
+     * The rows are copied, so changing them afterwards does not change the matrix.
      */
     public static Matrix build(List<Vector> rows) {
-        return new Matrix(new ArrayList<>(rows)); // defensive copy of the list
+        return new Matrix(rows);
     }
     
     public void calcDeterminant() {
@@ -86,7 +99,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         }
 
         double det = m.getDeterminant();
-        if (m.getDeterminant() == 0) {
+        if (det == 0) {
             throw new ArithmeticException("The matrix is singular (det = 0), so it has no inverse.");
         }
 
@@ -146,6 +159,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         int m = triang.getNumRows();
         int n = triang.getNumCols();
 
+        gaussSteps.clear();     // otherwise every call kept adding steps to the old ones
         detSign = 1.0;
         int pivotRow = 0;
 
@@ -323,8 +337,69 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     //--- Misc methods---
     
     public List<Vector> getRows() {
-        return List.copyOf(rows);
-    }    
+        List<Vector> copy = new ArrayList<>();
+        for (Vector row : rows) {
+            copy.add(new Vector(row));
+        }
+        return copy;
+    }
+
+    public Vector getRow(int row) {
+        Objects.checkIndex(row, size[0]);
+        return new Vector(rows.get(row));
+    }
+
+    public Vector getColumn(int col) {
+        Objects.checkIndex(col, size[1]);
+        List<Double> values = new ArrayList<>();
+        for (Vector row : rows) {
+            values.add(row.get(col));
+        }
+        return new Vector(values);
+    }
+
+    public void set(int row, int col, double value) {
+        Objects.checkIndex(row, size[0]);
+        Objects.checkIndex(col, size[1]);
+        rows.get(row).set(col, value);
+        calcDeterminant();
+    }
+
+    public void setRow(int row, Vector values) {
+        Objects.checkIndex(row, size[0]);
+        Objects.requireNonNull(values, "The row cannot be null.");
+        if (values.getDimension() != size[1]) {
+            throw new IllegalArgumentException("The row must have " + size[1]
+                    + " columns, but has " + values.getDimension() + ".");
+        }
+        rows.set(row, new Vector(values));
+        calcDeterminant();
+    }
+
+    public boolean isSquare() {
+        return size[0] == size[1];
+    }
+
+    public int[] getSize() {
+        return size.clone();
+    }
+
+    public List<String> getGaussSteps() {
+        return List.copyOf(gaussSteps);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Matrix other = (Matrix) o;
+        return rows.equals(other.rows);     
+    }
+
+    @Override
+    public int hashCode() {
+        return rows.hashCode();
+    }
     
     
     public static Matrix identity(int n) {
@@ -347,9 +422,16 @@ public class Matrix implements operable<Matrix>, elementalOperations {
  
     public int getNumCols() { return size[1]; }
  
-    public double get(int row, int col) { return rows.get(row).getValues().get(col); }
-    
+    public double get(int row, int col) {
+        Objects.checkIndex(row, size[0]);
+        return rows.get(row).get(col);      // no need to copy the whole row for one value
+    }
+
     public double getDeterminant() {
+        if (!isSquare()) {
+            throw new IllegalArgumentException("Only square matrices have a determinant, this one is "
+                    + size[0] + "x" + size[1] + ".");
+        }
         return determinant;
     }
         

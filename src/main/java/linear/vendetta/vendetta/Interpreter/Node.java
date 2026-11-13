@@ -14,7 +14,7 @@ import java.util.List;
 public record Node(NodeKind kind, String text, List<Node> children) {
 
     public enum NodeKind { 
-        NUMBER, NAME, CALL, BINARY, ASSIGN 
+        NUMBER, NAME, CALL, BINARY, ASSIGN, DECLARE
     }
 
     public Node {
