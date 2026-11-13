@@ -14,9 +14,13 @@ public class Matrix implements operable<Matrix>, elementalOperations {
     protected int[] size = new int[2];
     protected double determinant;
     protected double detSign;
+    protected List<String> gaussSteps = new ArrayList<>();
 
-
-       
+    
+    
+    //---CONSTRUCTOR METHODS AND DETERMINANT---
+    
+    
      // Private: go through build()
     private Matrix(List<Vector> rows) {
         if (rows == null || rows.isEmpty()) {
@@ -24,7 +28,8 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         }
         this.rows = rows;
         this.size[0] = rows.size();
-        this.size[1] = vectorValues(rows.get(0)).size();
+        this.size[1] = rows.get(0).getDimension();
+        calcDeterminant();
     }
 
 
@@ -50,29 +55,42 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         this.determinant = m.determinant;
     }
     
-    public Matrix getSubMatrix(int i, int j) {
-        if (i < 0 || i >= size[0] || j < 0 || j >= size[1]) {
-            throw new IndexOutOfBoundsException(
-                    "Position (" + i + ", " + j + ") is outside a "
-                    + size[0] + "x" + size[1] + " matrix.");
+    /**
+     * Matrix builder. Each Vector is one row; the size of its
+     * List is the number of columns.
+     */
+    public static Matrix build(List<Vector> rows) {
+        return new Matrix(new ArrayList<>(rows)); // defensive copy of the list
+    }
+    
+    public void calcDeterminant() {
+        if (size[0] != size[1]) {
+            determinant = NaN;
+            return;
         }
-        if (size[0] < 2 || size[1] < 2) {
-            throw new IllegalArgumentException("A submatrix needs a matrix of at least 2x2.");
+        
+        Matrix tri = toTriangle();          
+        double total = 1.0;
+        for (int i = 0; i < size[0]; i++) {
+            total *= tri.get(i, i);         
+        }
+        determinant = total * detSign;
+    }
+    
+    
+    //---MATRIX FUNCTIONS METHODS---
+    
+    public static Matrix inverse(Matrix m) {
+        if (m.getNumRows() != m.getNumCols()) {
+            throw new IllegalArgumentException("Only square matrices have an inverse.");
         }
 
-        List<Vector> subRows = new ArrayList<>();
-        for (int r = 0; r < size[0]; r++) {
-            if (r == i) continue;                       // skip row i
-
-            List<Double> values = new ArrayList<>();
-            for (int c = 0; c < size[1]; c++) {
-                if (c == j) continue;                   // skip column j
-                values.add(get(r, c));
-            }
-            subRows.add(new Vector(values));
+        double det = m.getDeterminant();
+        if (m.getDeterminant() == 0) {
+            throw new ArithmeticException("The matrix is singular (det = 0), so it has no inverse.");
         }
 
-        return build(subRows);
+        return Matrix.adj(m).scalarMult(1.0 / det);
     }
 
     public static Matrix adj(Matrix m) {
@@ -97,40 +115,126 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
         return result;
     }
-
-
-    //--ALREADY WORKING AND TESTED--
     
-    public static Matrix pow(Matrix m, double k) {
-        if (!(k % 1 == 0)) {
-            throw new IllegalArgumentException("Matrix powers only work with integer powers!");
+    private Matrix getSubMatrix(int i, int j) {
+        if (i < 0 || i >= size[0] || j < 0 || j >= size[1]) {
+            throw new IndexOutOfBoundsException(
+                    "Position (" + i + ", " + j + ") is outside a "
+                    + size[0] + "x" + size[1] + " matrix.");
         }
-        
-        if (m.getNumCols() != m.getNumRows()) {
-            throw new IllegalArgumentException("Matrix powers only work on square matrices!");
+        if (size[0] < 2 || size[1] < 2) {
+            throw new IllegalArgumentException("A submatrix needs a matrix of at least 2x2.");
         }
-        
-        if (k == 0) {
-            return identity(m.getNumCols());
+
+        List<Vector> subRows = new ArrayList<>();
+        for (int r = 0; r < size[0]; r++) {
+            if (r == i) continue;                       // skip row i
+
+            List<Double> values = new ArrayList<>();
+            for (int c = 0; c < size[1]; c++) {
+                if (c == j) continue;                   // skip column j
+                values.add(get(r, c));
+            }
+            subRows.add(new Vector(values));
         }
-        
-        if (k < 0) {
-            return pow(inverse(m), -k);
-        }
-        
-        return multiply(m, pow(m, k - 1));
+
+        return build(subRows);
     }
     
-    public static Matrix identity(int n) {
-        List<Vector> rows = new ArrayList<>();
+    public Matrix toTriangle() {
+        Matrix triang = new Matrix(this);
+        int m = triang.getNumRows();
+        int n = triang.getNumCols();
 
-        for (int i = 0; i < n; i++) {
-            Vector row = new Vector(n);  
-            row.set(i, 1.0);             
-            rows.add(row);
+        detSign = 1.0;
+        int pivotRow = 0;
+
+        for (int col = 0; col < n && pivotRow < m; col++) {
+            int best = pivotRow;
+            for (int r = pivotRow + 1; r < m; r++) {
+                if (Math.abs(triang.get(r, col)) > Math.abs(triang.get(best, col))) {
+                    best = r;
+                }
+            }
+
+            if (Math.abs(triang.get(best, col)) < 0.00001) {
+                continue;
+            }
+
+            if (best != pivotRow) {
+                gaussSteps.add(triang.rowSwap(pivotRow, best));
+                detSign *= -1.0;
+            }
+
+            double pivot = triang.get(pivotRow, col);
+            for (int r = pivotRow + 1; r < m; r++) {
+                double factor = triang.get(r, col) / pivot;
+                if (factor != 0.0) {
+                    gaussSteps.add(triang.rowComp(r, pivotRow, -factor));
+                    triang.rows.get(r).set(col, 0.0);   // exact zero, avoids 1e-16 leftovers
+                }
+            }
+
+            pivotRow++;
         }
 
-        return Matrix.build(rows);
+        return triang;
+    }
+    
+     /**
+     * Hey, @Matthew here, um see, I had a stroke of inspiration here and I am 
+     * semi-confident in how functional this code is. I actually drew up my 
+     * thoughts on paper for this one. I am too tired to test it out.
+     * @return the matrix that is now transposed
+     */
+    public Matrix transpose() {
+        List<Vector> transposed = new ArrayList<>();
+        for (int c = 0; c < size[1]; c++) {
+            List<Double> vals = new ArrayList<>();
+            for (int r = 0; r < size[0]; r++) {
+                vals.add(get(r, c));
+            }
+            transposed.add(new Vector(vals)); // assumes a Vector(List<Double>) constructor
+        }
+        return build(transposed);
+    }
+
+    //--Matrix Arithmetic--
+    
+    @Override
+    public Matrix add(Matrix m) {
+        if (this.getNumCols() != m.getNumCols() || this.getNumRows() != m.getNumRows()) {
+            throw new IllegalArgumentException("invalid sum sizes");
+        }
+        
+        List<Vector> vectors1 = this.getRows();
+        List<Vector> vectors2 = m.getRows();
+        List<Vector> resultm = new ArrayList<Vector>();
+        
+        for (int i = 0; i < vectors1.size(); i++) {
+            resultm.add(vectors1.get(i).add(vectors2.get(i)));
+        }
+        
+        return Matrix.build(resultm);
+    }
+
+
+    @Override
+    public Matrix subtract(Matrix a) {
+        return this.add(a.scalarMult(-1)); 
+    }
+
+
+    @Override
+    public Matrix scalarMult(double k) {
+        List<Vector> vectors = this.getRows();
+        List<Vector> resultm = new ArrayList<Vector>();
+        
+    for(int i = 0; i < vectors.size(); i++) {
+            resultm.add(vectors.get(i).scalarMult(k));
+        }
+        
+        return Matrix.build(resultm);
     }
     
     public static Matrix multiply(Matrix m1, Matrix m2) {
@@ -165,90 +269,31 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         return Vector.convertToVector(Matrix.multiply(m1, m2));
     }
     
-    public static Matrix convertToMatrix(Vector v) {
-        return Matrix.build(List.of(v)).transpose();
-    }
-    
-    @Override
-    public Matrix add(Matrix m) {
-        if (this.getNumCols() != m.getNumCols() || this.getNumRows() != m.getNumRows()) {
-            throw new IllegalArgumentException("invalid sum sizes");
+    public static Matrix pow(Matrix m, double k) {
+        if (!(k % 1 == 0)) {
+            throw new IllegalArgumentException("Matrix powers only work with integer powers!");
         }
         
-        List<Vector> vectors1 = this.getRows();
-        List<Vector> vectors2 = m.getRows();
-        List<Vector> resultm = new ArrayList<Vector>();
-        
-        for (int i = 0; i < vectors1.size(); i++) {
-            resultm.add(vectors1.get(i).add(vectors2.get(i)));
+        if (m.getNumCols() != m.getNumRows()) {
+            throw new IllegalArgumentException("Matrix powers only work on square matrices!");
         }
         
-        return Matrix.build(resultm);
-    }
-
-
-    @Override
-    public Matrix subtract(Matrix a) {
-        return this.add(a.scalarMult(-1)); 
-    }
-
-
-    @Override
-    public Matrix scalarMult(double k) {
-        List<Vector> vectors = this.getRows();
-        List<Vector> resultm = new ArrayList<Vector>();
-        
-        for(int i = 0; i < vectors.size(); i++) {
-            resultm.add(vectors.get(i).scalarMult(k));
+        if (k == 0) {
+            return identity(m.getNumCols());
         }
         
-        return Matrix.build(resultm);
-    }
-    
-    public List<Vector> getRows() {
-        return List.copyOf(rows);
-    }    
-    
-    /**
-     * Matrix builder. Each Vector is one row; the size of its
-     * List is the number of columns.
-     */
-    public static Matrix build(List<Vector> rows) {
-        return new Matrix(new ArrayList<>(rows)); // defensive copy of the list
-    }
- 
-    // Single point of contact with your Vector class.
-    private static List<Double> vectorValues(Vector v) {
-        return v.getValues(); // <-- rename if your getter differs
-    }
- 
-    // Getters
-  
-    public int getNumRows() { return size[0]; }
- 
-    public int getNumCols() { return size[1]; }
- 
-    public double get(int row, int col) { return vectorValues(rows.get(row)).get(col); }
-    
-    
-    public static Matrix inverse(Matrix m) {
-        if (m.getNumRows() != m.getNumCols()) {
-            throw new IllegalArgumentException("Only square matrices have an inverse.");
+        if (k < 0) {
+            return pow(inverse(m), -k);
         }
-
-        double det = m.getDeterminant();
-        if (m.getDeterminant() == 0) {
-            throw new ArithmeticException("The matrix is singular (det = 0), so it has no inverse.");
-        }
-
-        return Matrix.adj(m).scalarMult(1.0 / det);
+        
+        return multiply(m, pow(m, k - 1));
     }
+    
+    //---Elemental Matrix Operations---
     
     @Override  
-    public String rowMultiply(double a, int idx) {
-        Vector oldVector = this.rows.get(idx);
-        Vector newVector = oldVector.scalarMult(a); 
-        this.rows.set(idx, newVector);
+    public String rowMultiply(double a, int idx) { 
+        this.rows.set(idx, this.rows.get(idx).scalarMult(a));
         this.determinant = determinant * a;
         
         return String.format("R_%i -> R_%i * %d\n", idx, idx, a);
@@ -268,125 +313,44 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
     @Override
     public String rowComp(int idx1, int idx2, double k) {
-        List<Double> target = vectorValues(this.rows.get(idx1));
-        List<Double> source = vectorValues(this.rows.get(idx2));
+        Vector target = this.rows.get(idx1);
+        Vector source = this.rows.get(idx2);
         
-        List<Double> combined = new ArrayList<>();
-        for (int c = 0; c < size[1]; c++) {
-            combined.add(target.get(c) + k * source.get(c));
-        }
-        
-        this.rows.set(idx1, new Vector(combined));
-        
+        this.rows.set(idx1, target.add(source.scalarMult(k)));
         return String.format("R_%i -> R_%i + %d * R_%i\n", idx1, k, idx2);
     }
     
-    public void calcDeterminant() {
-        if (size[0] != size[1]) {
-            determinant = NaN;
-            return;
+    //--- Misc methods---
+    
+    public List<Vector> getRows() {
+        return List.copyOf(rows);
+    }    
+    
+    
+    public static Matrix identity(int n) {
+        List<Vector> rows = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            Vector row = new Vector(n);  
+            row.set(i, 1.0);             
+            rows.add(row);
         }
-        Matrix tri = toTriangle();          
-        double total = 1.0;
-        for (int i = 0; i < size[0]; i++) {
-            total *= tri.get(i, i);         
-        }
-        determinant = total * detSign;
+
+        return Matrix.build(rows);
     }
-
-
+    
+    public static Matrix convertToMatrix(Vector v) {
+        return Matrix.build(List.of(v)).transpose();
+    }
+  
+    public int getNumRows() { return size[0]; }
+ 
+    public int getNumCols() { return size[1]; }
+ 
+    public double get(int row, int col) { return rows.get(row).getValues().get(col); }
+    
     public double getDeterminant() {
-        calcDeterminant();
         return determinant;
-    }
-    
-    public Matrix toTriangle() { //gaussian elim (had to remove static to read
-        //the rows
-         int m = size[0];
-    int n = size[1];
-    double[][] a = new double[m][n];
-    for (int r = 0; r < m; r++) {
-        for (int c = 0; c < n; c++) {
-            a[r][c] = get(r, c);
-        }
-    }
-
-
-    // Determinant tracker: each row swap multiplies the determinant by -1.
-    detSign = 1.0;
-
-
-    int pivotRow = 0;
-    for (int col = 0; col < n && pivotRow < m; col++) {
-
-
-        int best = pivotRow;
-        for (int r = pivotRow + 1; r < m; r++) {
-            if (Math.abs(a[r][col]) > Math.abs(a[best][col])) {
-                best = r;
-            }
-        }
-
-
-        // No usable pivot if that small, move onto next pivot
-        if (Math.abs(a[best][col]) < 0.00001) {
-            continue;
-        }
-
-
-        // Swap the best row into the pivot position (only counts if rows differ).
-        if (best != pivotRow) {
-            double[] temp = a[pivotRow];
-            a[pivotRow] = a[best];
-            a[best] = temp;
-            detSign *= -1.0;
-        }
-
-
-        for (int r = pivotRow + 1; r < m; r++) {
-            double factor = a[r][col] / a[pivotRow][col];
-            a[r][col] = 0.0;
-            for (int c = col + 1; c < n; c++) {
-                a[r][c] -= factor * a[pivotRow][c];
-            }
-        }
-        pivotRow++;
-    }
-
-
-    return fromArray(a);
-}
-    
-    // Helper: turns a double[][] back into a Matrix using the builder.
-    //I really just added it because I'll probably need it later -Matthew
-    private static Matrix fromArray(double[][] a) {
-        List<Vector> result = new ArrayList<>();
-        for (double[] rowData : a) {
-            List<Double> vals = new ArrayList<>();
-            for (double v : rowData) {
-                vals.add(v);
-            }
-            result.add(new Vector(vals)); // assumes a Vector(List<Double>) constructor
-        }
-        return build(result);
-    }
-    
-     /**
-     * Hey, @Matthew here, um see, I had a stroke of inspiration here and I am 
-     * semi-confident in how functional this code is. I actually drew up my 
-     * thoughts on paper for this one. I am too tired to test it out.
-     * @return the matrix that is now transposed
-     */
-    public Matrix transpose() {
-        List<Vector> transposed = new ArrayList<>();
-        for (int c = 0; c < size[1]; c++) {
-            List<Double> vals = new ArrayList<>();
-            for (int r = 0; r < size[0]; r++) {
-                vals.add(get(r, c));
-            }
-            transposed.add(new Vector(vals)); // assumes a Vector(List<Double>) constructor
-        }
-        return build(transposed);
     }
         
     @Override

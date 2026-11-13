@@ -4,8 +4,6 @@
  */
 package linear.vendetta.vendetta.API;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author ian
@@ -20,7 +18,12 @@ public class SystemMatrix extends Matrix{
     }
     
     public Vector solve() {
-        return Matrix.multiply(Matrix.inverse(Matrix.build(this.rows)), eqVector);
+        if (this.determinant == 0) {
+            throw new MultipleOrNoSolutionException();
+        }
+        
+        
+        return multiply(inverse(this), eqVector);
     } 
     
     /*
