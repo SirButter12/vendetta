@@ -35,7 +35,7 @@ public class SystemMatrix extends Matrix{
      * @return the unique solution x
      * @throws MultipleOrNoSolutionException if there is no solution or infinitely many
      */
-    public Vector gaussJordan() {
+    public SolutionVector gaussJordan() {
         int m = getNumRows();
         int n = getNumCols();
  
@@ -99,7 +99,8 @@ public class SystemMatrix extends Matrix{
         for (int i = 0; i < n; i++) {
             solution.add(b.get(i));
         }
-        return new Vector(solution);
+        
+        return new SolutionVector(new Vector(solution), this.gaussSteps);
     }
  
     /** True if every value in the row has |value| at or below tol. */
