@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package linear.vendetta.vendetta.API;
 
 import java.util.ArrayList;
@@ -12,32 +8,32 @@ import java.util.Objects;
 
 
 /**
+ * Vector of doubles with at least 1 component.
+ * Operations return NEW vectors; only set() and setValues() modify this one.
  *
  * @author Alex
  */
 public class Vector implements operable<Vector> {
+    /** Max decimals shown by toString() / formatNumber(). Display only. */
     private static final int DISPLAY_DECIMALS = 4;
 
 
     /** The components of the vector in order: x, y, z, ... */
     protected List<Double> values;
- 
+
     /** How many components the vector has. Always equals values.size(). */
     private int dimension;
- 
- 
-    
+
+
+
     /**
-     * Builds a vector from a known list of components.
-     * The list is COPIED, so changing the original list later will not
-     * secretly change this vector.
+     * Vector from a list of numbers (any Number type, converted to double).
+     * The list is copied.
      *
-     * @throws IllegalArgumentException if the list is null, empty,
-     * or contains a null entry
+     * @throws IllegalArgumentException if the list is null, empty or has a null
      */
     public <T extends Number> Vector(List<T> values) {
-        // Convert each Number: the old (List<Double>) cast let List.of(1, 2)
-        // through and it blew up later with a ClassCastException
+        // Convert each Number to Double (a plain cast would break with List.of(1, 2))
         if (values == null) {
             throw new IllegalArgumentException("A vector needs at least one component.");
         }
@@ -48,15 +44,15 @@ public class Vector implements operable<Vector> {
         this.values = validatedCopy(doubles);
         this.dimension = this.values.size();
     }
-    
-    //By Ian,here is the constructor that generates a copy of the vector
+
+    /** Copy constructor. */
     public Vector(Vector v) {
         this.values = new ArrayList<>(v.values);
         this.dimension = v.dimension;
     }
-    
+
     /**
-     * Builds a vector of the given size where every component is 0.0.
+     * Zero vector of the given size.
      *
      * @throws IllegalArgumentException if dimension is less than 1
      */
@@ -70,61 +66,81 @@ public class Vector implements operable<Vector> {
     }
 
 
+    /** Number of components. */
     public int getDimension() {
         return dimension;
     }
 
 
+    /** Read-only copy of the components. */
     public List<Double> getValues() {
         return List.copyOf(values);
     }
- 
+
+    /** Replaces all components (list is copied, size may change). */
     public void setValues(List<Double> newValues) {
         this.values = validatedCopy(newValues);
         this.dimension = this.values.size();
     }
- 
-    /** Gets one component. Index starts at 0. */
+
+    /** Component at index (0-based). */
     public double get(int index) {
         Objects.checkIndex(index, dimension);
         return values.get(index);
     }
- 
+
+    /** Sets the component at index (0-based). In place. */
     public void set(int index, double value) {
         Objects.checkIndex(index, dimension);
         values.set(index, value);
     }
- 
-    
+
+
+    /** Returns k * this. */
     @Override
     public Vector scalarMult(double n) {
         Vector v = new Vector(this);
-        
+
         for (int i = 0; i < dimension; i++) {
             v.values.set(i, values.get(i) * n);
         }
-        
+
         return v;
     }
- 
+
+    /**
+     * Returns this + a.
+     *
+     * @throws IllegalArgumentException if dimensions differ
+     */
     @Override
     public Vector add(Vector a) {
         validateDimensions(a);
-        
+
         Vector sum = new Vector(this);
-        
+
         for (int i = 0; i < dimension; i++) {
             sum.values.set(i, sum.values.get(i) + a.values.get(i));
         }
-        
+
         return sum;
     }
- 
+
+    /**
+     * Returns this - a.
+     *
+     * @throws IllegalArgumentException if dimensions differ
+     */
     @Override
     public Vector subtract(Vector a) {
         return this.add(a.scalarMult(-1));
     }
- 
+
+    /**
+     * Dot product: sum of this[i] * a[i].
+     *
+     * @throws IllegalArgumentException if dimensions differ
+     */
     public double dotProduct(Vector a) {
         validateDimensions(a);
         double sum = 0.0;
@@ -133,50 +149,74 @@ public class Vector implements operable<Vector> {
         }
         return sum;
     }
-    
+
+    /**
+     * 2D "cross product": a1*b2 - a2*b1 (signed area, the z of the 3D cross).
+     *
+     * @throws IllegalArgumentException if either vector is not 2D
+     */
     public double cross2D(Vector v) {
         requireBothDimension(v, 2);
         return values.get(0) * v.values.get(1) - values.get(1) * v.values.get(0);
     }
-    
-    
+
+
+    /**
+     * 3D cross product: vector perpendicular to both.
+     *
+     * @throws IllegalArgumentException if either vector is not 3D
+     */
     public Vector cross3D(Vector v) {
         requireBothDimension(v, 3);
- 
+
         double a1 = values.get(0), a2 = values.get(1), a3 = values.get(2);
         double b1 = v.values.get(0), b2 = v.values.get(1), b3 = v.values.get(2);
- 
+
         List<Double> result = List.of(
                 a2 * b3 - a3 * b2,
                 a3 * b1 - a1 * b3,
                 a1 * b2 - a2 * b1);
-        return new Vector(result); //DONT REMOVE CURLY THEY ARE FOR ABSTRACTS //VECTOR IS NOT ABSTRACT DUMBASS
+        return new Vector(result);
     }
-      
-    
-    
+
+
+
+    /**
+     * Projection of this onto v: (this.v / v.v) * v.
+     *
+     * @throws ArithmeticException if v is the zero vector
+     */
     public Vector projectOn(Vector v) {
         validateDimensions(v);
- 
+
         double vDotV = v.dotProduct(v);
         if (vDotV == 0.0) {
             throw new ArithmeticException("Cannot project onto the zero vector.");
         }
- 
+
         double factor = this.dotProduct(v) / vDotV;
-        
+
         return v.scalarMult(factor);
     }
-    
+
+    /**
+     * n x 1 (column) matrix -> Vector.
+     *
+     * @throws IllegalArgumentException if m has more than 1 column
+     */
     public static Vector convertToVector(Matrix m) {
         if (m.getNumCols() != 1) {
             throw new IllegalArgumentException("m is not a vector matrix");
         }
-        
+
         return m.transpose().getRows().get(0);
     }
 
-    
+
+    /**
+     * Same dimension and same components (exact compare, -0 == 0).
+     * Uses instanceof, so a TransformableVector can equal a Vector.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -190,7 +230,8 @@ public class Vector implements operable<Vector> {
         }
         return true;
     }
-      
+
+    /** Consistent with equals (also treats -0 as 0). */
     @Override
     public int hashCode() {
         int result = 1;
@@ -199,15 +240,8 @@ public class Vector implements operable<Vector> {
         }
         return result;
     }
-    
-    /**
-     * Readable form for display, e.g. [1, 2.5, -3].
-     * Whole numbers lose the ".0" and long decimals are rounded to
-     * DISPLAY_DECIMALS places. This affects DISPLAY ONLY; the stored
-     * values keep full precision.
-     */
-    
-    //I deleted format number temporaly here for testing
+
+    /** Display text, e.g. [1, 2.5, -3]. Numbers go through formatNumber(). */
     @Override
     public String toString() {
         StringBuilder text = new StringBuilder("[");
@@ -217,12 +251,12 @@ public class Vector implements operable<Vector> {
         }
         return text.append("]").toString();
     }
-    
+
     /**
-     * Checks that this vector and v have the same size before a two-vector
-     * operation (add, subtract, dotProduct, projectOn).
+     * Guard for two-vector operations (add, subtract, dotProduct, projectOn).
      *
-     * @throws DimensionMismatchException if the sizes differ
+     * @throws IllegalArgumentException if sizes differ
+     * @throws NullPointerException if v is null
      */
     private void validateDimensions(Vector v) {
         Objects.requireNonNull(v, "The other vector cannot be null.");
@@ -232,10 +266,10 @@ public class Vector implements operable<Vector> {
                             + this.dimension + " and " + v.dimension + ".");
         }
     }
- /**
-     * exists because I was too lazy to write it twice
-     * @param v is the vector v
-     * @param required how many you need
+    /**
+     * Guard for cross products: both vectors must have exactly `required` components.
+     *
+     * @throws IllegalArgumentException otherwise
      */
     private void requireBothDimension(Vector v, int required) {
         Objects.requireNonNull(v, "The other vector cannot be null.");
@@ -245,12 +279,11 @@ public class Vector implements operable<Vector> {
                             + this.dimension + " and " + v.dimension + ".");
         }
     }
-    
+
     /**
-     * the method that will fix my TODO on how to check the validity of some 
-     * actions applied to vectors
-     * @param source the new component(S)
-     * @return the new List of values
+     * Copies the list, rejecting null/empty lists and null components.
+     *
+     * @throws IllegalArgumentException if invalid
      */
     private static List<Double> validatedCopy(List<Double> source) {
         if (source == null || source.isEmpty()) {
@@ -265,8 +298,8 @@ public class Vector implements operable<Vector> {
         }
         return copy;
     }
-    
-    
+
+
     /**
      * Turns -0.0 into 0.0 (adding 0.0 does exactly that).
      * Without this, [0] and [-0] (which appears after scalarMult(-1) on a zero)
@@ -275,8 +308,13 @@ public class Vector implements operable<Vector> {
     private static double clean(double x) {
         return x + 0.0;
     }
- 
-    
+
+
+    /**
+     * Number -> short display text: up to DISPLAY_DECIMALS decimals,
+     * no trailing zeros, always '.' as decimal point, -0 shown as 0.
+     * e.g. 2.0 -> "2", 1/3.0 -> "0.3333". NaN/Infinity printed as is.
+     */
     public static String formatNumber(double x) {
         if (Double.isNaN(x) || Double.isInfinite(x)) {
             return String.valueOf(x);

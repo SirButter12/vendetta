@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package linear.vendetta.vendetta.Interpreter;
 
 import java.util.ArrayList;
@@ -16,15 +12,25 @@ import linear.vendetta.vendetta.Interpreter.Node.NodeKind;
 import linear.vendetta.vendetta.Interpreter.Token.TokenType;
 
 /**
+ * Entry point of the interpreter. Holds the global variables and runs commands:
+ * text -> Tokenizer -> Parser -> Evaluator.
+ *
+ * Typical flow:
+ * 1. prepareVariables(commands): find Matrix/Vector declarations so the UI can ask for their values.
+ * 2. compile(commands, manualValues): run everything and get one result per command.
  *
  * @author ian
  */
 public class Interpreter {
+    /** Global variables (name -> Double/Vector/Matrix). Static: shared by every call. */
     private static HashMap<String, Object> memory = new HashMap();
+    /** Names that cannot be reassigned. */
     private static final Set<String> CONSTANTS = Set.of("pi", "e", "i");
-    
+
+    // Demo variables + constants.
+    // Note: i is the 2x2 matrix [[0,-1],[1,0]] (i^2 = -I), not a complex number.
     static {
-        // Vectores
+        // Vectors
         memory.put("A", new Vector(List.of(1.0, 2.0, 3.0)));
         memory.put("B", new Vector(List.of(2.0, -1.0, 3.0)));
         memory.put("C", new Vector(List.of(-1.0, 2.0)));
@@ -36,48 +42,46 @@ public class Interpreter {
                 new Vector(List.of(3.0, -2.0, 3.0)),
                 new Vector(List.of(0.0, -1.0, 5.0))
         )));
-        
+
         memory.put("M2", Matrix.build(List.of(
                 new Vector(List.of(6.0, 7.0, 6.0)),
                 new Vector(List.of(4.0, -8.0, 6.0)),
                 new Vector(List.of(0.0, -1.0, 9.0))
         )));
-        
-        
+
+
         memory.put("I", Matrix.build(List.of(
                 new Vector(List.of(1.0, 0.0, 0.0)),
                 new Vector(List.of(0.0, 1.0, 0.0)),
                 new Vector(List.of(0.0, 0.0, 1.0))
         )));
-        
+
         memory.put("i", Matrix.build(List.of(
                 new Vector(List.of(0.0, -1.0)),
                 new Vector(List.of(1.0, 0.0))
         )));
-        
+
         memory.put("M3", Matrix.build(List.of(
                 new Vector(List.of(1.0, 2.0, 3.0, 4.0)),
                 new Vector(List.of(1.0, 2.0, 3.0, 4.0)),
                 new Vector(List.of(1.0, 2.0, 3.0, 4.0))
-        )));   
-          
-    
-        
+        )));
+
+
+
         memory.put("pi", Math.PI);
         memory.put("e", Math.E);
     }
-    
+
     /**
-     * Enter: looks for the constructors ( NAME = Matrix(n, m) / NAME = Vector(n) )
-     * among the commands. Nothing is evaluated.
+     * Step 1. Finds the declarations (NAME = Matrix(n, m) / NAME = Vector(n)).
+     * Nothing else is evaluated.
      *
-     * Returns, in order, NAME -> empty Matrix/Vector with the requested size,
-     * so the frontend knows which inputs to show and with which dimensions.
-     * If NAME is not a key in memory yet it is created with that empty value;
-     * if it already is, it is left alone (compile will overwrite it with the
-     * manual values anyway). Memory is never reset.
+     * New names are added to memory as empty (zero) values; existing ones are kept.
      *
-     * A constructor without the right structure throws CommandException.
+     * @return NAME -> empty Matrix/Vector of the declared size, in command order
+     *         (tells the UI which inputs to show)
+     * @throws CommandException bad declaration, constant name, or name declared twice
      */
     public static Map<String, Object> prepareVariables(List<String> commands) {
         Map<String, Object> templates = new LinkedHashMap<>();
@@ -111,9 +115,10 @@ public class Interpreter {
     }
 
     /**
-     * Compile without manual values. If any command is a constructor it throws:
-     * those variables would only hold placeholder (garbage) values.
-     * Otherwise it works exactly as before.
+     * Runs the commands with no manual values.
+     *
+     * @return one result per command, in order
+     * @throws CommandException if any command is a declaration (its values would be empty)
      */
     public static List<CompiledResult> compile(List<String> commands) {
         List<Node> trees = parseAll(commands);
@@ -129,6 +134,14 @@ public class Interpreter {
         return run(commands, trees);
     }
 
+    /**
+     * Step 2. Loads manualValues into memory, then runs the commands.
+     * Every declared Matrix/Vector needs a value of the declared size.
+     * If manualValues is null, same as compile(commands).
+     *
+     * @return one result per command, in order
+     * @throws CommandException missing/wrong-size value, or any error while running
+     */
     public static List<CompiledResult> compile(List<String> commands, Map<String, Object> manualValues) {
         if (manualValues == null) {
             return compile(commands);
@@ -136,6 +149,7 @@ public class Interpreter {
 
         List<Node> trees = parseAll(commands);
 
+        // Check every declaration got a value of the right size before touching memory
         for (Node tree : trees) {
             if (tree.kind() != NodeKind.DECLARE) {
                 continue;
@@ -157,6 +171,7 @@ public class Interpreter {
         return run(commands, trees);
     }
 
+    /** Deep copy, so later changes in memory don't touch the caller's objects. */
     private static Object freshCopy(Object value) {
         if (value instanceof Matrix m) {
             List<Vector> rows = new ArrayList<>();
@@ -173,6 +188,12 @@ public class Interpreter {
         return value;
     }
 
+    /**
+     * Evaluates one expression that must give a finite number
+     * (e.g. a matrix cell typed as "sqrt(2)/2").
+     *
+     * @throws CommandException for assignments, non-numbers, NaN or infinity
+     */
     public static double evaluateEntry(String entry) {
         Node tree = new Parser(new Tokenizer(entry).getTokens()).parse();
 
@@ -190,6 +211,7 @@ public class Interpreter {
         throw new CommandException("'" + entry.trim() + "' is not a number");
     }
 
+    /** Evaluates the trees in order. A DECLARE returns the value already in memory. */
     private static List<CompiledResult> run(List<String> commands, List<Node> trees) {
         List<CompiledResult> results = new ArrayList<>();
 
@@ -205,6 +227,7 @@ public class Interpreter {
         return results;
     }
 
+    /** Parses everything first, so a syntax error stops the run before anything executes. */
     private static List<Node> parseAll(List<String> commands) {
         List<Node> trees = new ArrayList<>();
         for (String command : commands) {
@@ -213,6 +236,7 @@ public class Interpreter {
         return trees;
     }
 
+    /** Parses the command only if it uses Matrix/Vector; otherwise null. */
     private static Node parseIfConstructor(String command) {
         List<Token> tokens = new Tokenizer(command).getTokens();
 
@@ -227,15 +251,21 @@ public class Interpreter {
         return hasConstructor ? new Parser(tokens).parse() : null;
     }
 
+    /**
+     * Saves a variable.
+     *
+     * @throws CommandException if the name is a constant
+     */
     public static void assignToMemory(String name, Object obj) {
         if (CONSTANTS.contains(name)) {
             throw new CommandException(name + " is a constant and cannot be reassigned");
         }
-        
+
         memory.put(name, obj);
     }
-    
+
+    /** The live memory map (not a copy). */
     public static HashMap<String, Object> getMemory() {
         return memory;
-    }    
+    }
 }

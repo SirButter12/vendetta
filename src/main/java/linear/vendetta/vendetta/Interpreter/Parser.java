@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package linear.vendetta.vendetta.Interpreter;
 
 import java.util.ArrayList;
@@ -10,23 +6,39 @@ import linear.vendetta.vendetta.Interpreter.Node.NodeKind;
 import linear.vendetta.vendetta.Interpreter.Token.TokenType;
 
 /**
+ * Recursive-descent parser: tokens -> Node tree.
+ * One method per grammar rule, lowest to highest precedence:
+ * <pre>
+ * statement   = NAME '=' expression | expression
+ * expression  = term (('+' | '-') term)*            left-assoc
+ * term        = unary (('*' | '/') unary)*          left-assoc
+ * unary       = '-' unary | exp                     -2^2 = -(2^2) = -4
+ * exp         = factor ('^' unary)?                 right-assoc: 2^3^2 = 2^9
+ * factor      = NUMBER | NAME | '(' expression ')'
+ *             | FUNCT '(' [expression (',' expression)*] ')'
+ *             | '[' expression (',' expression)* ']'
+ * constructor = NAME '=' (Matrix | Vector) '(' NUMBER (',' NUMBER)* ')'   whole command only
+ * </pre>
  *
  * @author ian
  */
 public class Parser {
     private final List<Token> tokens;
-    private int pos = 0;
+    private int pos = 0;    // index of the current token
+    // Required start of a constructor command: NAME = Matrix/Vector (
     private static final List<TokenType> constStructure = List.of(
             Token.TokenType.NAME,
             Token.TokenType.EQUALS,
             Token.TokenType.CONSTRUCTOR,
-            Token.TokenType.LPAREN        
+            Token.TokenType.LPAREN
             );
 
+    /** @param tokens output of Tokenizer (must end with END) */
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
-    
+
+    /** True if the command starts with NAME = CONSTRUCTOR (. */
     private boolean matchesConstTokens() {
         if (tokens.size() < constStructure.size()) {    // "Matrix" alone has only 2 tokens
             return false;
@@ -37,39 +49,48 @@ public class Parser {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
+    /** True if Matrix/Vector appears anywhere in the command. */
     private boolean containsConst() {
         for (Token t: tokens) {
             if (t.tokenType == Token.TokenType.CONSTRUCTOR) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
-    private Token peek() {                          
+    /** Current token, not consumed. */
+    private Token peek() {
         return tokens.get(pos);
     }
 
-    private Token next() {                          
+    /** Consumes and returns the current token. Never moves past END. */
+    private Token next() {
         Token t = tokens.get(pos);
         if (t.tokenType != TokenType.END) {
-            pos++;                                  
+            pos++;
         }
         return t;
     }
 
-    private Token expect(TokenType type, String message) {   
+    /** Consumes a token of the given type, or throws CommandException(message). */
+    private Token expect(TokenType type, String message) {
         if (peek().tokenType != type) {
             throw new CommandException(message);
         }
         return next();
     }
 
+    /**
+     * Parses the whole command (entry point).
+     *
+     * @throws CommandException on a syntax error or leftover tokens
+     */
     public Node parse() {
         if (containsConst()) {
             if (!matchesConstTokens()) {
@@ -79,13 +100,17 @@ public class Parser {
         }
 
         Node tree = parseStatement();
-        if (peek().tokenType != TokenType.END) {   
+        if (peek().tokenType != TokenType.END) {
             throw new CommandException("Unexpected '" + peek().oriText + "'");
         }
         return tree;
     }
-    
-    
+
+
+    /**
+     * NAME = Matrix(2, 3) -> DECLARE(NAME) with one child CALL(Matrix) holding the sizes.
+     * Sizes must be plain numbers (no expressions).
+     */
     private Node parseConstructor() {
         String name = next().oriText;        // NAME
         next();                              // =
@@ -114,6 +139,7 @@ public class Parser {
         return new Node(NodeKind.DECLARE, name, List.of(call));
     }
 
+    /** Smallest unit: number, variable, (expr), function call or [list]. */
     private Node parseFactor() {
         Token t = next();
 
@@ -124,11 +150,11 @@ public class Parser {
             return new Node(NodeKind.NAME, t.oriText, List.of());
         }
         if (t.tokenType == TokenType.LPAREN) {
-            Node inner = parseExpression();            
+            Node inner = parseExpression();
             expect(TokenType.RPAREN, "Missing ')'");
-            return inner;                              
+            return inner;
         }
-        
+
         if (t.tokenType == TokenType.FUNCT) {
             expect(Token.TokenType.LPAREN, "Expected '(' after " + t.oriText);
             ArrayList<Node> arguments = new ArrayList<>();
@@ -146,14 +172,43 @@ public class Parser {
 
             return new Node(NodeKind.CALL, t.oriText, arguments);
         }
-        
+
+        if (t.tokenType == TokenType.LBRACKET) {
+            return parseList();
+        }
+
         if (t.tokenType == TokenType.END) {
             throw new CommandException("Unexpected end of command");
-        }    
-            
-        throw new CommandException("Unexpected '" + t.oriText + "'");    
+        }
+
+        throw new CommandException("Unexpected '" + t.oriText + "'");
     }
-    
+
+    /**
+     * Called after '['. Elements are expressions: [1, 2+3] -> LIST.
+     * Nested lists ([[1,2],[3,4]]) become matrix rows in the Evaluator.
+     */
+    private Node parseList() {
+        List<Node> elements = new ArrayList<>();
+
+        if (peek().tokenType == TokenType.RBRACKET) {
+            throw new CommandException("Empty brackets: a vector needs at least one value");
+        }
+
+        elements.add(parseExpression());
+        while (peek().tokenType == TokenType.COMMA) {
+            next();
+            elements.add(parseExpression());
+        }
+
+        expect(TokenType.RBRACKET, "Missing ']'");
+        return new Node(NodeKind.LIST, "[]", elements);
+    }
+
+    /**
+     * Leading minus. -NUMBER is folded into a negative NUMBER;
+     * anything else becomes (-1 * x).
+     */
     private Node parseUnary() {
         if (peek().tokenType == TokenType.MINUS) {
             next();
@@ -163,19 +218,21 @@ public class Parser {
             }
             return new Node(NodeKind.BINARY, "*", List.of(new Node(NodeKind.NUMBER, "-1", List.of()), operand));
         }
-        return parseExp();  
+        return parseExp();
     }
 
+    /** Addition and subtraction. */
     private Node parseExpression() {
-        Node left = parseTerm();                        
+        Node left = parseTerm();
         while (peek().tokenType == TokenType.PLUS || peek().tokenType == TokenType.MINUS) {
-            String op = next().oriText;                 
-            Node right = parseTerm();                   
+            String op = next().oriText;
+            Node right = parseTerm();
             left = new Node(NodeKind.BINARY, op, List.of(left, right));
         }
         return left;
     }
 
+    /** Multiplication and division. */
     private Node parseTerm() {
         Node left = parseUnary();
         while (peek().tokenType == TokenType.STAR || peek().tokenType == TokenType.SLASH) {
@@ -185,26 +242,28 @@ public class Parser {
         }
         return left;
     }
-    
+
+    /** Power. The exponent is parsed as unary, so 2^-1 works. */
     private Node parseExp() {
-        Node base = parseFactor();   
+        Node base = parseFactor();
         if (peek().tokenType == TokenType.EXP) {
             String op = next().oriText;
-            Node exponent = parseUnary();   
+            Node exponent = parseUnary();
             return new Node(NodeKind.BINARY, op, List.of(base, exponent));
         }
         return base;
     }
-    
+
+    /** Assignment if it starts with NAME =, otherwise a plain expression. */
     private Node parseStatement() {
         if ((pos + 1 < tokens.size()) && tokens.get(pos).tokenType.equals(TokenType.NAME) && tokens.get(pos + 1).tokenType.equals(TokenType.EQUALS)) {
             String name = next().oriText;
             next();
             Node valor = parseExpression();
-            
+
             return new Node(NodeKind.ASSIGN, name, List.of(valor));
         }
-        
+
         return parseExpression();
     }
 }

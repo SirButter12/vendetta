@@ -1,28 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Exception.java to edit this template
- */
 package linear.vendetta.vendetta.Interpreter;
 
 /**
+ * Error in a user command (bad syntax, wrong types, unknown variable...).
+ * The message is meant to be shown to the user.
  *
  * @author ian
  */
 public class CommandException extends RuntimeException {
 
-    /**
-     * Creates a new instance of <code>CommandException</code> without detail
-     * message.
-     */
+    /** No message. */
     public CommandException() {
     }
 
-    /**
-     * Constructs an instance of <code>CommandException</code> with the
-     * specified detail message.
-     *
-     * @param msg the detail message.
-     */
+    /** @param msg text shown to the user */
     public CommandException(String msg) {
         super(msg);
     }
