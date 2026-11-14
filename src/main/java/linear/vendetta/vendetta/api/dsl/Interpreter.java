@@ -25,50 +25,10 @@ public class Interpreter {
     /** Global variables (name -> Double/Vector/Matrix). Static: shared by every call. */
     private static HashMap<String, Object> memory = new HashMap();
     /** Names that cannot be reassigned. */
-    private static final Set<String> CONSTANTS = Set.of("pi", "e", "i");
+    private static final Set<String> CONSTANTS = Set.of("pi", "e");
 
-    // Demo variables + constants.
-    // Note: i is the 2x2 matrix [[0,-1],[1,0]] (i^2 = -I), not a complex number.
+    //constants.
     static {
-        // Vectors
-        memory.put("A", new Vector(List.of(1.0, 2.0, 3.0)));
-        memory.put("B", new Vector(List.of(2.0, -1.0, 3.0)));
-        memory.put("C", new Vector(List.of(-1.0, 2.0)));
-        memory.put("D", new Vector(List.of(0.0, 1.0)));
-
-        // Matrices
-        memory.put("M1", Matrix.build(List.of(
-                new Vector(List.of(1.0, 2.0, 6.0)),
-                new Vector(List.of(3.0, -2.0, 3.0)),
-                new Vector(List.of(0.0, -1.0, 5.0))
-        )));
-
-        memory.put("M2", Matrix.build(List.of(
-                new Vector(List.of(6.0, 7.0, 6.0)),
-                new Vector(List.of(4.0, -8.0, 6.0)),
-                new Vector(List.of(0.0, -1.0, 9.0))
-        )));
-
-
-        memory.put("I", Matrix.build(List.of(
-                new Vector(List.of(1.0, 0.0, 0.0)),
-                new Vector(List.of(0.0, 1.0, 0.0)),
-                new Vector(List.of(0.0, 0.0, 1.0))
-        )));
-
-        memory.put("i", Matrix.build(List.of(
-                new Vector(List.of(0.0, -1.0)),
-                new Vector(List.of(1.0, 0.0))
-        )));
-
-        memory.put("M3", Matrix.build(List.of(
-                new Vector(List.of(1.0, 2.0, 3.0, 4.0)),
-                new Vector(List.of(1.0, 2.0, 3.0, 4.0)),
-                new Vector(List.of(1.0, 2.0, 3.0, 4.0))
-        )));
-
-
-
         memory.put("pi", Math.PI);
         memory.put("e", Math.E);
     }
@@ -263,7 +223,18 @@ public class Interpreter {
 
         memory.put(name, obj);
     }
-
+    
+    /**
+     * Resets memory leaving only mathematical constants
+     */
+    public static void resetMemory() {
+        memory.clear();
+        
+        memory.put("pi", Math.PI);
+        memory.put("e", Math.E);
+    } 
+            
+    
     /** The live memory map (not a copy). */
     public static HashMap<String, Object> getMemory() {
         return memory;
