@@ -446,12 +446,17 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
     /**
      * m^k for whole k (square only).
-     * k = 0 -> identity, negative k -> inverse(m)^|k|. Does |k| multiplications.
+     * k = 0 -> identity, negative k -> inverse(m)^|k|.
      *
-     * @throws IllegalArgumentException if k is not whole or m is not square
+     * Exponentiation by squaring, iterative: about 2*log2(|k|) multiplications
+     * and no recursion, so m^1000000 takes ~40 products instead of a
+     * StackOverflowError.
+     *
+     * @throws IllegalArgumentException if k is not whole, too big, or m is not square
+     * @throws ArithmeticException if k is negative and m is singular
      */
     public static Matrix pow(Matrix m, double k) {
-        if (!(k % 1 == 0)) {
+        if (Double.isNaN(k) || Double.isInfinite(k) || k % 1 != 0) {
             throw new IllegalArgumentException("Matrix powers only work with integer powers!");
         }
 
@@ -459,15 +464,27 @@ public class Matrix implements operable<Matrix>, elementalOperations {
             throw new IllegalArgumentException("Matrix powers only work on square matrices!");
         }
 
-        if (k == 0) {
-            return identity(m.getNumCols());
+        // Beyond this a double can't hold the exponent as an exact whole number anyway
+        if (Math.abs(k) > 1e15) {
+            throw new IllegalArgumentException("The power is too big (max 10^15).");
         }
 
-        if (k < 0) {
-            return pow(inverse(m), -k);
+        long exp = (long) Math.abs(k);
+        Matrix base = (k < 0) ? inverse(m) : new Matrix(m);
+        Matrix result = identity(m.getNumCols());
+
+        // Binary digits of exp: m^13 = m^8 * m^4 * m^1  (13 = 1101 in binary)
+        while (exp > 0) {
+            if ((exp & 1) == 1) {               // this bit is on: include the current power
+                result = multiply(result, base);
+            }
+            exp >>= 1;                          // next bit
+            if (exp > 0) {
+                base = multiply(base, base);    // m -> m^2 -> m^4 -> m^8 ...
+            }
         }
 
-        return multiply(m, pow(m, k - 1));
+        return result;
     }
 
     //---Elemental Matrix Operations---
