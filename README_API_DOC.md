@@ -441,9 +441,6 @@ Optional: `A+B` and `A + B` are the same.
 
 | Item | Status |
 |---|---|
-| `Interpreter.resetMemory()` (keep only `pi`, `e`, `i`) | Planned |
-| Remove the demo variables from the static block of `Interpreter` | Planned |
-| `gaussJordan` prints its steps to the console; `CompiledResult` has no way to return them | To do: expose the steps in the result |
 | `solveSystem` has no steps (it uses the inverse) | By design |
 | `CompiledResult` doesn't include the assigned variable name | Possible improvement |
 | Invalid numbers like `1e3` or `.5` give an error with a `null` message | Possible improvement |
