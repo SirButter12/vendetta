@@ -3,8 +3,8 @@ package linear.vendetta.vendetta;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import linear.vendetta.vendetta.Interpreter.CompiledResult;
-import linear.vendetta.vendetta.Interpreter.Interpreter;
+import linear.vendetta.vendetta.api.dsl.CompiledResult;
+import linear.vendetta.vendetta.api.dsl.Interpreter;
 
 /**
  * Console version for testing
@@ -53,7 +53,7 @@ public class ConsoleApp {
 
     private static void runCommand(String command) {
         try {
-            List<CompiledResult> results = Interpreter.compile(List.of(command));
+            List<CompiledResult> results = Interpreter.interprete(List.of(command));
             for (CompiledResult result : results) {
                 System.out.println(result.getResult());
             }
@@ -62,7 +62,6 @@ public class ConsoleApp {
             System.out.println("Error: " + message);
         }
     }
-
 
     private static void printWelcome() {
         System.out.println("==============================================");

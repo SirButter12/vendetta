@@ -12,7 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import linear.vendetta.vendetta.Interpreter.Node;
+import linear.vendetta.vendetta.api.dsl.Node;
 
 public class PrimaryController {
 
