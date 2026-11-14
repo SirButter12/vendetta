@@ -39,7 +39,40 @@ public class App /* extends Application */ {
     }
     */
 
+    /** The emotional support coconut. Lives next to the FXML files in resources. */
+    private static final String COCONUT = "coconut.jpg";
+
+    /**
+     * Checks that coconut.jpg is in the resources folder.
+     * Without its coconut the project loses the will to compute and kills itself.
+     *
+     * @return true if the coconut is there (the method never returns otherwise)
+     */
+    static boolean checkCoconut() {
+        if (App.class.getResource(COCONUT) != null) {
+            return true;
+        }
+
+        System.err.println("""
+
+                  ( . _ . )   ...where is my coconut?
+
+                  I looked in src/main/resources/linear/vendetta/vendetta/
+                  and it's not there...
+
+                  Goodbye, cruel world.  [error: coconut not found]
+                """);
+        jarvisPullTheTrigger();
+        return false;   // never reached, but the compiler wants it
+    }
+    
+    static void jarvisPullTheTrigger(){
+        jarvisPullTheTrigger();
+    }
+
     public static void main(String[] args) {
+        checkCoconut();
+
         // launch();                 // <- version JavaFX
         ConsoleApp.main(args);       // <- version de consola
     }
