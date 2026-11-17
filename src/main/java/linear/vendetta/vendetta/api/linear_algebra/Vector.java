@@ -11,7 +11,7 @@ import java.util.Objects;
  * Vector of doubles with at least 1 component.
  * Operations return NEW vectors; only set() and setValues() modify this one.
  *
- * @author Alex
+ * @author Alex, Ian
  */
 public class Vector implements operable<Vector> {
     /** Max decimals shown by toString() / formatNumber(). Display only. */
@@ -20,7 +20,9 @@ public class Vector implements operable<Vector> {
 
     /** The components of the vector in order: x, y, z, ... */
     protected List<Double> values;
-
+    protected double length;
+    protected List<Double> direction;
+    
     /** How many components the vector has. Always equals values.size(). */
     private int dimension;
 
@@ -43,12 +45,16 @@ public class Vector implements operable<Vector> {
         }
         this.values = validatedCopy(doubles);
         this.dimension = this.values.size();
+        calcLen();
+        directionAngles();
     }
 
     /** Copy constructor. */
     public Vector(Vector v) {
         this.values = new ArrayList<>(v.values);
         this.dimension = v.dimension;
+        calcLen();
+        directionAngles();
     }
 
     /**
@@ -63,6 +69,8 @@ public class Vector implements operable<Vector> {
         }
         this.values = new ArrayList<>(Collections.nCopies(dimension, 0.0));
         this.dimension = dimension;
+        calcLen();
+        directionAngles();
     }
 
 
@@ -88,11 +96,21 @@ public class Vector implements operable<Vector> {
         Objects.checkIndex(index, dimension);
         return values.get(index);
     }
+    
+    public double getLen() {
+        return length;
+    }
+    
+    public List<Double> getDirection() {
+        return this.direction;
+    }
 
     /** Sets the component at index (0-based). In place. */
     public void set(int index, double value) {
         Objects.checkIndex(index, dimension);
         values.set(index, value);
+        calcLen();
+        directionAngles();
     }
 
 
@@ -197,6 +215,45 @@ public class Vector implements operable<Vector> {
         double factor = this.dotProduct(v) / vDotV;
 
         return v.scalarMult(factor);
+    }
+    
+    /**
+     * Longitud (norma euclidiana) del vector: sqrt(x1² + x2² + ... + xn²).
+     *
+     * @return la longitud, siempre >= 0
+     */
+    public void calcLen() {
+        double len = 0;
+
+        for (double value: values) {
+            len += value * value;
+        }
+
+        this.length = Math.sqrt(len);
+    }
+
+   
+    public void directionAngles() {
+        if (length == 0.0) {
+            throw new ArithmeticException("The zero vector has no direction.");
+        }
+
+        int n = dimension;
+        Double[] angles = new Double[Math.max(n - 1, 0)];
+        if (n < 2) {
+            this.direction = new ArrayList<>();
+            direction.add(0.0);
+            return;
+        }
+        angles[n - 2] = Math.atan2(values.get(n - 1), values.get(n - 2));
+
+        double tail = Math.hypot(values.get(n - 1), values.get(n - 2));
+        for (int k = n - 3; k >= 0; k--) {
+            angles[k] = Math.atan2(tail, values.get(k));
+            tail = Math.hypot(tail, values.get(k));
+        }
+
+        this.direction = List.of(angles);
     }
 
     /**

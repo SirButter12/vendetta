@@ -136,6 +136,8 @@ public class Evaluator {
         }
 
         return switch(node.text()) {
+            case "length" -> length(args);
+            case "direction" -> direction(args);    
             case "adj" -> adj(args);
             case "inv" -> inv(args);
             case "trans" -> trans(args);

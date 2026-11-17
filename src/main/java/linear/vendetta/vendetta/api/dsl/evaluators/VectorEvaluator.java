@@ -48,4 +48,24 @@ public class VectorEvaluator {
         expectArgs("vector", args, 1);
         return new Vector(toSize(args.get(0)));
     }
+    
+    public static Object length(List<Object> args) {
+        expectArgs("length", args, 1);
+        
+        if (args.get(0) instanceof Vector v) {
+            return v.getLen();
+        }
+        
+        throw new CommandException("Invalid argument for function");
+    }
+
+    public static Object direction(List<Object> args) {
+        expectArgs("direction", args, 1);
+        
+        if (args.get(0) instanceof Vector v) {
+            return new Vector(v.getDirection()); //provicional
+        }
+        
+        throw new CommandException("Invalid argument for function");
+    }
 }

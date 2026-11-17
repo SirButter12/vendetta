@@ -16,8 +16,7 @@ Contents:
 9. [Error handling](#9-error-handling)
 10. [API calls summary](#10-api-calls-summary)
 11. [FXML ↔ controller contract](#11-fxml--controller-contract)
-12. [Decisions not in the original spec](#12-decisions-not-in-the-original-spec)
-13. [Waiting on the API](#13-waiting-on-the-api)
+
 
 ---
 
@@ -171,12 +170,10 @@ Leaves everything as if the app had just been opened:
 | UI event | API call | Why |
 |---|---|---|
 | Enter (any line) | `prepareVariables(allCommands + line)` | Is it a constructor? What size? Duplicates? |
-| Enter (direct assignment) | `interprete([line])` | Get the values to fill the card |
-| Compile, each cell | `evaluateEntry(cellText)` | Turn cell text into a number |
 | Compile, once | `interprete(declarations, manualValues)` | Load hand-typed values into memory |
 | Compile, each other command | `interprete([command])` | Run it, independently of the others |
 | Plane redraw | `getMemory().get(name)` | Current value of each plotted vector |
-| Clear | `resetMemory()` *(pending)* | Back to constants only |
+| Clear | `resetMemory()`| Back to constants only |
 
 Display helpers: `Vector.formatNumber`, `Matrix.convertToMatrix(Vector)` (vector → column matrix, handy for displaying a vector vertically), `getNumRows / getNumCols / get(r, c)`, `getDimension / get(i)`.
 
@@ -250,10 +247,4 @@ These were chosen to fill gaps; change them here if the team wants something els
 
 ---
 
-## 13. Waiting on the API
 
-| Item | Needed for |
-|---|---|
-| `Interpreter.resetMemory()` | Clear button |
-| Removing the demo variables (`A`, `B`, `C`, `D`, `M1`, ...) from memory at startup | So variables only exist if the user creates them |
-| Returning the Gauss-Jordan steps in the result | Showing "R2 → R2 − 3(R1) ..." in Output, like the mock-up. Until then only the final vector is shown |
