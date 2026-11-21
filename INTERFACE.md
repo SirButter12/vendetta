@@ -1,7 +1,7 @@
 # Vendetta interface specification
 
 How the graphical interface must behave and how it talks to the API.
-For the API itself see `README.md`. For the work split see `TASKS_MATTHEWS.md` (controller) and `TASKS_ADRIAN.md` (FXML / Scene Builder).
+For the API itself see `API.md`. For the work split see `TASKS_MATTHEWS.md` (controller) and `TASKS_ADRIAN.md` (FXML / Scene Builder).
 
 Contents:
 
@@ -79,7 +79,7 @@ Locking accepted lines keeps the command list and what the user sees in sync.
 - Each cell accepts **any expression that evaluates to a number**: `3`, `-1.5`, `sqrt(2)/2`, `pi/4`, `det(M1)`.
 - Cells are read with `Interpreter.evaluateEntry(text)`. It already rejects everything that isn't a valid number: vectors, matrices, assignments, syntax errors, `NaN`, infinity.
 - When a cell is invalid it is marked red; the mark disappears as soon as the user edits it.
-- Initial cell text is the number formatted with `Vector.formatNumber` (`0`, `2`, `0.3333`).
+- Initial cell text is the number formatted with `helpers.formatNumber` (`0`, `2`, `0.3333`).
 
 ---
 
@@ -119,10 +119,11 @@ The controller needs one method that turns any result into something the UI can 
 
 | Result | Shown as |
 |---|---|
-| `Double` | A label with `Vector.formatNumber(value)` |
+| `Double` | A label with `helpers.formatNumber(value)` |
 | `Vector` | A column between brackets (one number per row), like the vector cards |
+| `SolutionVector` (from `gaussJordan`) | Like a `Vector` (it is one). Its row operations are available with `getSteps()` |
 | `Matrix` | A grid between brackets |
-| anything else | A label with `toString()` |
+| anything else (e.g. `PolarForm` from `polarize`) | A label with `toString()` |
 | error | A red label: `Error: message` |
 
 Each Output entry is: the command (bold) and below it the displayed result or error. The Output scrolls to the bottom when something is added.
@@ -138,7 +139,7 @@ Leaves everything as if the app had just been opened:
 - empty Output;
 - Input with a single empty line;
 - empty Cartesian plane (grid and axes only);
-- memory reset with `Interpreter.resetMemory()`, so only the constants `pi`, `e`, `i` survive (**this method doesn't exist yet**, see section 13).
+- memory reset with `Interpreter.resetMemory()`, so only the constants `pi` and `e` survive.
 
 ---
 
@@ -175,7 +176,7 @@ Leaves everything as if the app had just been opened:
 | Plane redraw | `getMemory().get(name)` | Current value of each plotted vector |
 | Clear | `resetMemory()`| Back to constants only |
 
-Display helpers: `Vector.formatNumber`, `Matrix.convertToMatrix(Vector)` (vector → column matrix, handy for displaying a vector vertically), `getNumRows / getNumCols / get(r, c)`, `getDimension / get(i)`.
+Display helpers: `helpers.formatNumber`, `Matrix.convertToMatrix(Vector)` (vector → column matrix, handy for displaying a vector vertically), `getNumRows / getNumCols / get(r, c)`, `getDimension / get(i)`.
 
 ---
 
@@ -246,5 +247,3 @@ These were chosen to fill gaps; change them here if the team wants something els
 | A manual name that is later directly assigned (`A = [...]`) stops being manual | The new value replaces the hand-typed one |
 
 ---
-
-
