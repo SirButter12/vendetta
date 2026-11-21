@@ -13,7 +13,9 @@ import static linear.vendetta.vendetta.api.dsl.evaluators.MatrixEvaluator.*;
 import static linear.vendetta.vendetta.api.dsl.evaluators.ArithmeticEvaluator.*;
 import static linear.vendetta.vendetta.api.dsl.evaluators.VectorEvaluator.*;
 import linear.vendetta.vendetta.api.linear_algebra.SolutionVector;
-import linear.vendetta.vendetta.api.linear_algebra.PolarForm;
+import static linear.vendetta.vendetta.api.helpers.expectArgs;
+import static linear.vendetta.vendetta.api.helpers.toSize;
+import static linear.vendetta.vendetta.api.helpers.wrongArgs;
 
 /**
  * Walks a Node tree and computes its value (Double, Vector or Matrix).
@@ -70,22 +72,6 @@ public class Evaluator {
             sizes.add(String.valueOf(toSize(evaluateNode(child))));
         }
         return constructor.text() + "(" + String.join(", ", sizes) + ")";
-    }
-
-    /**
-     * True if both are Matrices with the same rows x cols,
-     * or both are Vectors with the same dimension.
-     */
-    public static boolean sameShape(Object a, Object b) {
-        if (a instanceof Matrix m1 && b instanceof Matrix m2) {
-            return m1.getNumRows() == m2.getNumRows() && m1.getNumCols() == m2.getNumCols();
-        }
-
-        if (a instanceof Vector v1 && b instanceof Vector v2) {
-            return v1.getDimension() == v2.getDimension();
-        }
-
-        return false;
     }
 
     /**
@@ -244,55 +230,5 @@ public class Evaluator {
         }
 
         throw new CommandException("A list must contain only numbers (vector) or only vectors (matrix rows)");
-    }
-
-    /**
-     * Error for a function called with values of the wrong type, e.g.
-     * "det(M) needs a matrix M, but it got a vector".
-     *
-     * @param usage how the function is written, e.g. "det(M)"
-     * @param expected what it needs, e.g. "a matrix M"
-     */
-    public static CommandException wrongArgs(String usage, String expected, List<Object> args) {
-        List<String> got = new ArrayList<>();
-        for (Object o : args) {
-            got.add(typeName(o));
-        }
-        return new CommandException(usage + " needs " + expected + ", but it got " + String.join(" and ", got));
-    }
-
-    /** "a number", "a vector", "a matrix", "a polar form" (for error messages). */
-    public static String typeName(Object o) {
-        if (o instanceof Double) return "a number";
-        if (o instanceof Matrix) return "a matrix";
-        if (o instanceof Vector) return "a vector";
-        if (o instanceof PolarForm) return "a polar form";
-        return o == null ? "nothing" : o.getClass().getSimpleName();
-    }
-
-    /** @throws CommandException if args does not have exactly n elements */
-    public static void expectArgs(String fn, List<Object> args, int n) {
-        if (args.size() != n) {
-            throw new CommandException(fn + " needs " + n + " argument(s)");
-        }
-    }
-    
-    /** @throws CommandException if args has fewer than n elements */
-    public static void expectMinArgs(String fn, List<Object> args, int n) {
-        if (args.size() < n) {
-            throw new CommandException(fn + " needs at least " + n + " argument(s)");
-        }
-    }
-
-    /**
-     * Value -> positive whole number (for sizes).
-     *
-     * @throws CommandException otherwise
-     */
-    public static int toSize(Object o) {
-        if (o instanceof Double d && d == Math.floor(d) && d > 0) {
-            return d.intValue();
-        }
-        throw new CommandException("Sizes must be whole positive numbers");
     }
 }

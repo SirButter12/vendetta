@@ -1,5 +1,6 @@
 package linear.vendetta.vendetta.api.linear_algebra;
 
+import linear.vendetta.vendetta.api.helpers;
 import static java.lang.Double.NaN;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -502,7 +503,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         this.rows.set(idx, this.rows.get(idx).scalarMult(a));
         invalidateDeterminant();
 
-        return String.format("R_%d -> R_%d * %s\n", idx, idx, Vector.formatNumber(a));
+        return helpers.rowMultiplyStep(a, idx);
     }
 
 
@@ -512,7 +513,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         Collections.swap(this.rows, idx1, idx2);
         invalidateDeterminant();
 
-        return String.format("R_%d <-> R_%d\n", idx1, idx2);
+        return helpers.rowSwapStep(idx1, idx2);
     }
 
 
@@ -524,7 +525,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
         this.rows.set(idx1, target.add(source.scalarMult(k)));
         invalidateDeterminant();    // does not change det in exact math, but it can change the rounding
-        return String.format("R_%d -> R_%d + %s * R_%d\n", idx1, idx1, Vector.formatNumber(k), idx2);
+        return helpers.rowCompStep(idx1, idx2, k);
     }
 
     //--- Misc methods---
@@ -669,7 +670,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         int[] widths = new int[numCols];
         for (int r = 0; r < numRows; r++) {
             for (int c = 0; c < numCols; c++) {
-                cells[r][c] = Vector.formatNumber(get(r, c));
+                cells[r][c] = helpers.formatNumber(get(r, c));
                 widths[c] = Math.max(widths[c], cells[r][c].length());
             }
         }

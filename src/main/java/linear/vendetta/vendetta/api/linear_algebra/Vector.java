@@ -1,9 +1,9 @@
 package linear.vendetta.vendetta.api.linear_algebra;
 
+import linear.vendetta.vendetta.api.helpers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 
@@ -14,8 +14,6 @@ import java.util.Objects;
  * @author Alex, Ian
  */
 public class Vector implements operable<Vector> {
-    /** Max decimals shown by toString() / formatNumber(). Display only. */
-    private static final int DISPLAY_DECIMALS = 4;
 
 
     /** The components of the vector in order: x, y, z, ... */
@@ -337,13 +335,13 @@ public class Vector implements operable<Vector> {
         return result;
     }
 
-    /** Display text, e.g. [1, 2.5, -3]. Numbers go through formatNumber(). */
+    /** Display text, e.g. [1, 2.5, -3]. Numbers go through helpers.formatNumber(). */
     @Override
     public String toString() {
         StringBuilder text = new StringBuilder("[");
         for (int i = 0; i < dimension; i++) {
             if (i > 0) text.append(", ");
-            text.append(formatNumber(values.get(i)));
+            text.append(helpers.formatNumber(values.get(i)));
         }
         return text.append("]").toString();
     }
@@ -403,23 +401,5 @@ public class Vector implements operable<Vector> {
      */
     private static double clean(double x) {
         return x + 0.0;
-    }
-
-
-    /**
-     * Number -> short display text: up to DISPLAY_DECIMALS decimals,
-     * no trailing zeros, always '.' as decimal point, -0 shown as 0.
-     * e.g. 2.0 -> "2", 1/3.0 -> "0.3333". NaN/Infinity printed as is.
-     */
-    public static String formatNumber(double x) {
-        if (Double.isNaN(x) || Double.isInfinite(x)) {
-            return String.valueOf(x);
-        }
-        // Locale.ROOT forces a "." decimal point even on a French (comma) computer.
-        String text = String.format(Locale.ROOT, "%." + DISPLAY_DECIMALS + "f", x);
-        if (text.contains(".")) {
-            text = text.replaceAll("0+$", "").replaceAll("\\.$", "");   // trim trailing zeros
-        }
-        return text.equals("-0") ? "0" : text;
     }
 }
