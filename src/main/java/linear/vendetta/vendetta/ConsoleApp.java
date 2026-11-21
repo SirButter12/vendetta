@@ -45,6 +45,7 @@ public class ConsoleApp {
                 }
                 case "help" -> printHelp();
                 case "memory" -> printMemory();
+                case "clear", "reset" -> clearMemory();
                 default -> runCommand(line);
             }
         }
@@ -69,7 +70,7 @@ public class ConsoleApp {
         System.out.println("==============================================");
         System.out.println();
         System.out.println("Type 'help' for help, 'memory' to see stored");
-        System.out.println("variables, or 'exit' to quit.");
+        System.out.println("variables, 'clear' to delete them, or 'exit' to quit.");
         printMemory();
     }
 
@@ -110,6 +111,19 @@ public class ConsoleApp {
         System.out.println("  dot(u, v)        Dot product (a number)");
         System.out.println("  cross(u, v)      Cross product: 2D gives a number, 3D gives a vector");
         System.out.println("  project(u, v)    Projection of u onto v");
+        System.out.println("  length(v)        Length (norm) of v: length([3, 4]) = 5");
+        System.out.println("  direction(v)     Direction angles of v in radians, as a vector (n-1 angles)");
+        System.out.println("                   2D: [atan2(y, x)]. 1D: [0] or [pi]. Not defined for the zero vector");
+
+        System.out.println("\n--- Polar form (angles in radians) ---");
+        System.out.println("  polarV(r, t1, ..., tk)  Vector from its length and k angles (k+1 components)");
+        System.out.println("                          polarV(5, 0.9273) = [3, 4], polarV(2, pi/2, pi/2) = [0, 0, 2]");
+        System.out.println("  polarV(r)               1D vector [r] (r can be negative)");
+        System.out.println("  polarize(v)             Polar form of v: polarize([3, 4]) = {length: 5, angles: [0.9273]}");
+        System.out.println("                          1D: {length: -5, angles: []}. Not defined for the zero vector");
+        System.out.println("  polarV(polarize(v))     Back to the original vector");
+        System.out.println("                          A polar form can only be shown or passed to polarV,");
+        System.out.println("                          it cannot be used in + - * /");
 
         System.out.println("\n--- Matrix functions ---");
         System.out.println("  det(M)           Determinant (square matrices only)");
@@ -140,9 +154,17 @@ public class ConsoleApp {
 
         System.out.println("\n--- Console commands ---");
         System.out.println("  memory           List every stored variable and its value");
+        System.out.println("  clear            Delete every variable (constants like pi and e are kept). Also: reset");
         System.out.println("  help             Show this message");
         System.out.println("  exit             Close the program");
         System.out.println("======================================");
+    }
+
+    /** Deletes every variable, leaving only the built-in constants. */
+    private static void clearMemory() {
+        Interpreter.resetMemory();
+        System.out.println("Memory cleared. Only the constants are left.");
+        printMemory();
     }
 
     private static void printMemory() {

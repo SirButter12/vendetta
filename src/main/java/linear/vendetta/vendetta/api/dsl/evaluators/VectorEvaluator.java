@@ -1,10 +1,13 @@
 package linear.vendetta.vendetta.api.dsl.evaluators;
 
+import java.util.ArrayList;
 import java.util.List;
 import linear.vendetta.vendetta.api.linear_algebra.Vector;
 import linear.vendetta.vendetta.api.dsl.CommandException;
 import static linear.vendetta.vendetta.api.dsl.Evaluator.expectArgs;
+import static linear.vendetta.vendetta.api.dsl.Evaluator.expectMinArgs;
 import static linear.vendetta.vendetta.api.dsl.Evaluator.toSize;
+import linear.vendetta.vendetta.api.linear_algebra.PolarForm;
 
 /**
  * Vector functions callable from commands.
@@ -70,6 +73,47 @@ public class VectorEvaluator {
             }
         }
         
+        throw new CommandException("Invalid argument for function");
+    }
+    
+        /**
+     * polarV(r, t1, ..., tk) -> Cartesian Vector of k+1 components (angles in radians).
+     * polarV(r) -> [r]. polarV(polarize(v)) -> v.
+     */
+    public static Vector polarV(List<Object> args) {
+        expectMinArgs("polarV", args, 1);
+
+        if (args.size() == 1 && args.get(0) instanceof PolarForm p) {
+            return p.toVector();
+        }
+
+        List<Double> numbers = new ArrayList<>();
+        for (Object o : args) {
+            if (!(o instanceof Double d) || d.isNaN() || d.isInfinite()) {
+                throw new CommandException("polarV only takes numbers: polarV(length, angle1, angle2, ...)");
+            }
+            numbers.add(d);
+        }
+
+        try {
+            return Vector.fromPolar(numbers.get(0), numbers.subList(1, numbers.size()));
+        } catch (IllegalArgumentException e) {
+            throw new CommandException(e.getMessage());
+        }
+    }
+
+    /** polarize(v) -> {length: r, angles: [t1, ...]}. */
+    public static PolarForm polarize(List<Object> args) {
+        expectArgs("polarize", args, 1);
+
+        if (args.get(0) instanceof Vector v) {
+            try {
+                return v.toPolar();
+            } catch (ArithmeticException e) {
+                throw new CommandException("The zero vector has no polar form");
+            }
+        }
+
         throw new CommandException("Invalid argument for function");
     }
 }

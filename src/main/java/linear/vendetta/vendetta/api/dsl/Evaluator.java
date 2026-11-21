@@ -138,6 +138,8 @@ public class Evaluator {
         return switch(node.text()) {
             case "length" -> length(args);
             case "direction" -> direction(args);    
+            case "polarV" -> polarV(args);
+            case "polarize" -> polarize(args);    
             case "adj" -> adj(args);
             case "inv" -> inv(args);
             case "trans" -> trans(args);
@@ -247,6 +249,13 @@ public class Evaluator {
     public static void expectArgs(String fn, List<Object> args, int n) {
         if (args.size() != n) {
             throw new CommandException(fn + " needs " + n + " argument(s)");
+        }
+    }
+    
+    /** @throws CommandException if args has fewer than n elements */
+    public static void expectMinArgs(String fn, List<Object> args, int n) {
+        if (args.size() < n) {
+            throw new CommandException(fn + " needs at least " + n + " argument(s)");
         }
     }
 
