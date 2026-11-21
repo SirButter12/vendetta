@@ -5,7 +5,9 @@ import linear.vendetta.vendetta.api.linear_algebra.Matrix;
 import linear.vendetta.vendetta.api.linear_algebra.Vector;
 import linear.vendetta.vendetta.api.dsl.CommandException;
 import linear.vendetta.vendetta.api.dsl.CommandException;
+import linear.vendetta.vendetta.api.dsl.Evaluator;
 import static linear.vendetta.vendetta.api.dsl.Evaluator.expectArgs;
+import static linear.vendetta.vendetta.api.dsl.Evaluator.wrongArgs;
 
 /**
  * Operators + - * / ^ and dot(), for every supported type combination.
@@ -30,7 +32,7 @@ public class ArithmeticEvaluator {
             return Matrix.multiply(m, v);
         }
 
-        throw new CommandException("Invalid argument for function");
+        throw wrongArgs("dot(u, v)", "two vectors, two matrices, or a matrix and a vector", args);
     }
 
     /** a + b. Both must be the same type (number, Vector or Matrix). */
@@ -130,7 +132,8 @@ public class ArithmeticEvaluator {
             return Matrix.pow(m, a);
         }
 
-        throw new CommandException("^ only works for numbers!!!");
+        throw new CommandException("^ only works as number ^ number or matrix ^ whole number, but it got "
+                + Evaluator.typeName(o1) + " ^ " + Evaluator.typeName(o2));
     }
 
 

@@ -13,6 +13,7 @@ import static linear.vendetta.vendetta.api.dsl.evaluators.MatrixEvaluator.*;
 import static linear.vendetta.vendetta.api.dsl.evaluators.ArithmeticEvaluator.*;
 import static linear.vendetta.vendetta.api.dsl.evaluators.VectorEvaluator.*;
 import linear.vendetta.vendetta.api.linear_algebra.SolutionVector;
+import linear.vendetta.vendetta.api.linear_algebra.PolarForm;
 
 /**
  * Walks a Node tree and computes its value (Double, Vector or Matrix).
@@ -185,7 +186,7 @@ public class Evaluator {
             return systemMatrix.solve();
         }
 
-        throw new CommandException("Invalid arguments");
+        throw wrongArgs("solveSystem(A, b)", "a matrix A and a vector b", args);
     }
 
     /** gaussJordan(A, b): solves Ax = b with Gauss-Jordan and prints the steps to stdout. */
@@ -205,7 +206,7 @@ public class Evaluator {
             return s;
         }
 
-        throw new CommandException("Invalid arguments");
+        throw wrongArgs("gaussJordan(A, b)", "a matrix A and a vector b", args);
     }
 
     /**
@@ -243,6 +244,30 @@ public class Evaluator {
         }
 
         throw new CommandException("A list must contain only numbers (vector) or only vectors (matrix rows)");
+    }
+
+    /**
+     * Error for a function called with values of the wrong type, e.g.
+     * "det(M) needs a matrix M, but it got a vector".
+     *
+     * @param usage how the function is written, e.g. "det(M)"
+     * @param expected what it needs, e.g. "a matrix M"
+     */
+    public static CommandException wrongArgs(String usage, String expected, List<Object> args) {
+        List<String> got = new ArrayList<>();
+        for (Object o : args) {
+            got.add(typeName(o));
+        }
+        return new CommandException(usage + " needs " + expected + ", but it got " + String.join(" and ", got));
+    }
+
+    /** "a number", "a vector", "a matrix", "a polar form" (for error messages). */
+    public static String typeName(Object o) {
+        if (o instanceof Double) return "a number";
+        if (o instanceof Matrix) return "a matrix";
+        if (o instanceof Vector) return "a vector";
+        if (o instanceof PolarForm) return "a polar form";
+        return o == null ? "nothing" : o.getClass().getSimpleName();
     }
 
     /** @throws CommandException if args does not have exactly n elements */

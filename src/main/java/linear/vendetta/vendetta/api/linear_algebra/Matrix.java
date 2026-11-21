@@ -412,7 +412,9 @@ public class Matrix implements operable<Matrix>, elementalOperations {
      */
     public static Matrix multiply(Matrix m1, Matrix m2) {
         if (m1.getNumCols() != m2.getNumRows()) {
-            throw new IllegalArgumentException("Not valid sizes");
+            throw new IllegalArgumentException("Can't multiply a " + m1.getNumRows() + "x" + m1.getNumCols()
+                    + " matrix by a " + m2.getNumRows() + "x" + m2.getNumCols()
+                    + " matrix: the first one's columns must equal the second one's rows");
         }
 
         List<Vector> vectorsm1 = m1.getRows();
@@ -439,6 +441,11 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
     /** m1 * v, with v used as a column vector. Returns a Vector. */
     public static Vector multiply(Matrix m1, Vector v) {
+        if (m1.getNumCols() != v.getDimension()) {
+            throw new IllegalArgumentException("Can't multiply a " + m1.getNumRows() + "x" + m1.getNumCols()
+                    + " matrix by a vector of dimension " + v.getDimension()
+                    + ": the vector needs as many components as the matrix has columns");
+        }
         Matrix m2 = Matrix.convertToMatrix(v);
 
         return Vector.convertToVector(Matrix.multiply(m1, m2));
