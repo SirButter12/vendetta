@@ -81,6 +81,12 @@ public class Tokenizer {
         for (int i = 0; i < command.length(); i++) {
             char c = commandChars[i];
 
+            // Sign of an exponent (1e-3, 2.5E+4): it belongs to the number, it is not an operator
+            if ((c == '-' || c == '+') && isExponentSign(current, commandChars, i)) {
+                current.append(c);
+                continue;
+            }
+
             if (tokenMapping.containsKey(c)) {
                 validate(current.toString());
                 tokens.add(new Token(String.valueOf(c), tokenMapping.get(c)));
@@ -102,8 +108,19 @@ public class Tokenizer {
     }
 
     /**
+     * True if the '+'/'-' at position i is the sign of an exponent:
+     * the word so far is a number ending in e/E ("1e", "2.5E") and a digit follows.
+     * "2e - 3" (with spaces) is not, and stays a subtraction.
+     */
+    private static boolean isExponentSign(CharSequence current, char[] chars, int i) {
+        return current.toString().matches("^\\d+(\\.\\d+)?[eE]$")
+                && i + 1 < chars.length
+                && Character.isDigit(chars[i + 1]);
+    }
+
+    /**
      * Classifies a finished word and adds its token. Empty words are ignored.
-     * Numbers: digits with optional decimals ("2", "2.5"; not ".5" or "1e3").
+     * Numbers: digits with optional decimals and exponent ("2", "2.5", "1e3", "2.5E-4"; not ".5").
      * Names: letter followed by letters/digits.
      *
      * @throws CommandException for anything else, e.g. "2x", with a message
@@ -120,7 +137,7 @@ public class Tokenizer {
             tokens.add(new Token(str, Token.TokenType.CONSTRUCTOR));
         } else if (str.matches("^[a-zA-Z][a-zA-Z0-9]*$")) {
             tokens.add(new Token(str, Token.TokenType.NAME));
-        } else if (str.matches("^\\d+(\\.\\d+)?$")) {
+        } else if (str.matches("^\\d+(\\.\\d+)?([eE][+-]?\\d+)?$")) {
             tokens.add(new Token(str, Token.TokenType.NUMBER));
         } else {
             throw new CommandException(invalidWordMessage(str));
@@ -145,10 +162,14 @@ public class Tokenizer {
             }
         }
 
-        // Scientific notation: 1e3, 2.5E10, and "1e" from 1e-3 (the '-' splits the word)
-        if (str.matches("^\\d+(\\.\\d+)?[eE]\\d*$")) {
-            return start + "scientific notation is not supported yet. Write the full number (1e3 -> 1000) "
-                    + "or use a power (2.5 * 10^3)";
+        // Scientific notation with no exponent: "2e", "2.5E", "1e-" (or "1e - 3" with spaces)
+        if (str.matches("^\\d+(\\.\\d+)?[eE][+-]?$")) {
+            return start + "scientific notation needs a whole exponent right after the e, "
+                    + "with no spaces: 2e3, 1.5e-4";
+        }
+        // Exponent followed by more stuff: "1e3.5", "2e3e4"
+        if (str.matches("^\\d+(\\.\\d+)?[eE][+-]?\\d+.+$")) {
+            return start + "the exponent must be a whole number, like 1e3 or 2.5e-4";
         }
         // A number glued to a name: 2x, 3pi, 2.5sqrt
         java.util.regex.Matcher glued = java.util.regex.Pattern
