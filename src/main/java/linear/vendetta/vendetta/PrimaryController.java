@@ -8,13 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import linear.vendetta.vendetta.api.dsl.CommandException;
@@ -115,7 +119,7 @@ public class PrimaryController {
      */
     @FXML
     public void initialize() {
-        // TODO Task 3: addInputLine()
+        addInputLine();
         // TODO Task 10: redraw the plane when graphPane's width/height change
         // TODO Task 10: drawPlane()
     }
@@ -123,28 +127,84 @@ public class PrimaryController {
     /** Clear button (onAction="#onClear"). Resets everything. */
     @FXML
     private void onClear() {
-        // TODO Task 11
-        // 1. Interpreter.resetMemory()   (not in the API yet: leave it commented with a TODO)
-        // 2. empty commands, manualNames, matrixCells, vectorCells, cards, plotted
-        // 3. remove the children of matricesBox, vectorsBox, outputBox, commandsBox
-        // 4. addInputLine(), drawPlane()
+        Interpreter.resetMemory();
+        commands.clear();
+        manualNames.clear();
+        matrixCells.clear();
+        vectorCells.clear();
+        cards.clear();
+        plotted.clear();
+        matricesBox.getChildren().clear();
+        vectorsBox.getChildren().clear();
+        outputBox.getChildren().clear();
+        commandsBox.getChildren().clear();
+        addInputLine();
+        drawPlane();
     }
 
     /** Compile button (onAction="#onCompile"). */
     @FXML
     private void onCompile() {
-        // TODO Task 9
-        // 1. if currentLine has text -> onEnter(currentLine); if accepted lock it + addInputLine(), else stop
-        // 2. outputBox children cleared
-        // 3. manualValues = readManualValues()                       (error -> addError + stop)
-        // 4. declarations = commands whose extractName(...) is in manualNames
-        // 5. Interpreter.interprete(declarations, manualValues)     (error -> addError + stop)
-        // 6. for each command, in order:
-        //      declaration -> addOutput(command, toDisplay(manualValues.get(name)))
-        //      otherwise   -> try Interpreter.interprete(List.of(command)).get(0).getResult()
-        //                     addOutput(...); if NAME = Matrix/Vector and NAME not manual -> showCard(name, result, false)
-        //                     catch Exception -> addError(command, errorMessage(e)) and continue
-        // 7. drawPlane()
+        // 1. pending line
+        if (!currentLine.getText().trim().isEmpty()) {
+            if (!onEnter(currentLine)) {
+                return;
+            }
+            currentLine.setEditable(false);
+            addInputLine();
+        }
+
+        // 2. clear output
+        outputBox.getChildren().clear();
+
+        // 3. read the hand-typed values
+        Map<String, Object> manualValues;
+        try {
+            manualValues = readManualValues();
+        } catch (Exception e) {
+            addError("Compile", errorMessage(e));
+            return;
+        }
+
+        // 4. load them into memory (declarations only)
+        List<String> declarations = new ArrayList<>();
+        for (String command : commands) {
+            if (isConstructor(command) && manualNames.contains(extractName(command))) {
+                declarations.add(command);
+            }
+        }
+        try {
+            Interpreter.interprete(declarations, manualValues);
+        } catch (Exception e) {
+            addError("Compile", errorMessage(e));
+            return;
+        }
+
+        // 5. run the commands one at a time
+        for (String command : commands) {
+            String name = extractName(command);
+
+            if (isConstructor(command)) {
+                if (manualNames.contains(name)) {
+                    addOutput(command, toDisplay(manualValues.get(name)));
+                }
+                continue;   // a declaration that was later overwritten by "NAME = [...]"
+            }
+
+            try {
+                Object result = Interpreter.interprete(List.of(command)).get(0).getResult();
+                addOutput(command, toDisplay(result));
+                if (name != null && !manualNames.contains(name)
+                        && (result instanceof Matrix || result instanceof Vector)) {
+                    showCard(name, result, false);
+                }
+            } catch (Exception e) {
+                addError(command, errorMessage(e));
+            }
+        }
+
+        // 6. plane
+        drawPlane();
     }
 
     // =====================================================================
@@ -153,11 +213,21 @@ public class PrimaryController {
 
     /** Creates a new empty Input line at the end of commandsBox and focuses it. */
     private void addInputLine() {
-        // TODO Task 3
-        // - new TextField, style class "command-line", unlimited max width
-        // - on Enter: if onEnter(field) -> field not editable + addInputLine()
-        // - add to commandsBox, currentLine = field, request focus
-        // - scroll inputScroll to the bottom
+        TextField field = new TextField();
+        field.getStyleClass().add("command-line");
+        field.setMaxWidth(Double.MAX_VALUE);
+        field.setOnAction(ev -> {
+            if (onEnter(field)) {
+                field.setEditable(false);
+                addInputLine();
+            }
+        });
+        commandsBox.getChildren().add(field);
+        currentLine = field;
+        Platform.runLater(() -> {
+            field.requestFocus();
+            inputScroll.setVvalue(1.0);
+        });
     }
 
     /**
@@ -166,13 +236,24 @@ public class PrimaryController {
      * @return true if the command was accepted and added to commands
      */
     private boolean onEnter(TextField line) {
-        // TODO Task 7
-        // - trimmed text; empty -> false
-        // - remove "field-error" from the line
-        // - handleConstructor(text); if false and isDirectAssignment(text) -> handleDirectAssignment(text)
-        // - catch Exception -> addError(text, errorMessage(e)), add "field-error", return false
-        // - commands.add(text), return true
-        return false;
+        String text = line.getText().trim();
+        if (text.isEmpty()) {
+            return false;
+        }
+        line.getStyleClass().remove("field-error");
+
+        try {
+            if (!handleConstructor(text) && isDirectAssignment(text)) {
+                handleDirectAssignment(text);
+            }
+        } catch (Exception e) {
+            addError(text, errorMessage(e));
+            line.getStyleClass().add("field-error");
+            return false;
+        }
+
+        commands.add(text);
+        return true;
     }
 
     /**
@@ -183,8 +264,24 @@ public class PrimaryController {
      * @throws CommandException bad declaration, constant or duplicated name
      */
     private boolean handleConstructor(String text) {
-        // TODO Task 7.2
-        return false;
+        if (!isConstructor(text)) {
+            return false;
+        }
+        String name = extractName(text);
+        if (name == null) {
+            return false;
+        }
+
+        List<String> all = new ArrayList<>(commands);
+        all.add(text);
+        Object template = Interpreter.prepareVariables(all).get(name);
+        if (template == null) {
+            return false;
+        }
+
+        manualNames.add(name);
+        showCard(name, template, true);
+        return true;
     }
 
     /**
@@ -194,15 +291,25 @@ public class PrimaryController {
      * @throws CommandException (or other exceptions from the API) if it can't be evaluated
      */
     private boolean handleDirectAssignment(String text) {
-        // TODO Task 7.4
-        // remember: if the name was in manualNames, remove it from there
-        return false;
+        String name = extractName(text);
+        Object result = Interpreter.interprete(List.of(text)).get(0).getResult();
+        if (name == null || !(result instanceof Matrix || result instanceof Vector)) {
+            return false;
+        }
+        manualNames.remove(name);
+        showCard(name, result, false);
+        return true;
     }
 
     /** True if text has '=' and what follows (trimmed) starts with '['. */
     private boolean isDirectAssignment(String text) {
-        // TODO Task 7.3
-        return false;
+        int eq = text.indexOf('=');
+        return eq >= 0 && text.substring(eq + 1).trim().startsWith("[");
+    }
+
+    /** True if text looks like NAME = Matrix(...) / NAME = Vector(...). */
+    private boolean isConstructor(String text) {
+        return text.matches("\\s*[A-Za-z][A-Za-z0-9]*\\s*=\\s*(Matrix|Vector)\\s*\\(.*");
     }
 
     /**
@@ -211,8 +318,12 @@ public class PrimaryController {
      * @return null if there is no '=' or it's not a valid name (letter followed by letters/digits)
      */
     private String extractName(String text) {
-        // TODO Task 7.5
-        return null;
+        int eq = text.indexOf('=');
+        if (eq < 0) {
+            return null;
+        }
+        String name = text.substring(0, eq).trim();
+        return name.matches("[A-Za-z][A-Za-z0-9]*") ? name : null;
     }
 
     // =====================================================================
@@ -227,7 +338,27 @@ public class PrimaryController {
      * @param editable true for constructor variables (manualNames)
      */
     private void showCard(String name, Object value, boolean editable) {
-        // TODO Task 6.3
+        // remove any previous card (and cells) of this name
+        HBox old = cards.remove(name);
+        if (old != null && old.getParent() instanceof Pane parent) {
+            parent.getChildren().remove(old);
+        }
+        matrixCells.remove(name);
+        vectorCells.remove(name);
+
+        HBox card;
+        VBox target;
+        if (value instanceof Matrix m) {
+            card = buildMatrixCard(name, m, editable);
+            target = matricesBox;
+        } else if (value instanceof Vector v) {
+            card = buildVectorCard(name, v, editable);
+            target = vectorsBox;
+        } else {
+            return;
+        }
+        cards.put(name, card);
+        target.getChildren().add(card);
     }
 
     /**
@@ -235,8 +366,18 @@ public class PrimaryController {
      * Stores the cells in matrixCells.
      */
     private HBox buildMatrixCard(String name, Matrix matrix, boolean editable) {
-        // TODO Task 6.1
-        return new HBox();
+        int rows = matrix.getNumRows();
+        int cols = matrix.getNumCols();
+        TextField[][] cells = new TextField[rows][cols];
+        GridPane grid = new GridPane();
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                cells[r][c] = newCell(matrix.get(r, c), editable);
+                grid.add(cells[r][c], c, r);
+            }
+        }
+        matrixCells.put(name, cells);
+        return assembleCard(name, grid);
     }
 
     /**
@@ -244,8 +385,41 @@ public class PrimaryController {
      * if the vector is 2D. Stores the cells in vectorCells.
      */
     private HBox buildVectorCard(String name, Vector vector, boolean editable) {
-        // TODO Task 6.2
-        return new HBox();
+        int n = vector.getDimension();
+        TextField[] cells = new TextField[n];
+        GridPane grid = new GridPane();
+        for (int i = 0; i < n; i++) {
+            cells[i] = newCell(vector.get(i), editable);
+            grid.add(cells[i], 0, i);
+        }
+        vectorCells.put(name, cells);
+        // TODO Task 10: radio button (plot) for 2D vectors
+        return assembleCard(name, grid);
+    }
+
+    private TextField newCell(double value, boolean editable) {
+        TextField cell = new TextField(Vector.formatNumber(value));
+        cell.getStyleClass().add(editable ? "cell-field" : "cell-readonly");
+        cell.setEditable(editable);
+        cell.setPrefColumnCount(4);
+        cell.textProperty().addListener((obs, a, b) -> cell.getStyleClass().remove("field-error"));
+        return cell;
+    }
+
+    private HBox assembleCard(String name, GridPane grid) {
+        Label label = new Label(name + " =");
+        label.getStyleClass().add("card-name");
+        HBox card = new HBox(label, bracket("bracket-left"), grid, bracket("bracket-right"));
+        card.getStyleClass().add("card");
+        return card;
+    }
+
+    private Region bracket(String styleClass) {
+        Region r = new Region();
+        r.getStyleClass().add(styleClass);
+        r.setMinWidth(8);
+        r.setPrefWidth(8);
+        return r;
     }
 
     /**
@@ -256,8 +430,40 @@ public class PrimaryController {
      *         and say which variable, row and column in the message)
      */
     private Map<String, Object> readManualValues() {
-        // TODO Task 8
-        return new HashMap<>();
+        Map<String, Object> values = new HashMap<>();
+        for (String name : manualNames) {
+            TextField[][] mCells = matrixCells.get(name);
+            TextField[] vCells = vectorCells.get(name);
+            if (mCells != null) {
+                List<Vector> rows = new ArrayList<>();
+                for (int r = 0; r < mCells.length; r++) {
+                    List<Double> row = new ArrayList<>();
+                    for (int c = 0; c < mCells[r].length; c++) {
+                        row.add(readCell(name, mCells[r][c], "row " + (r + 1) + ", column " + (c + 1)));
+                    }
+                    rows.add(new Vector(row));
+                }
+                values.put(name, Matrix.build(rows));
+            } else if (vCells != null) {
+                List<Double> comps = new ArrayList<>();
+                for (int i = 0; i < vCells.length; i++) {
+                    comps.add(readCell(name, vCells[i], "component " + (i + 1)));
+                }
+                values.put(name, new Vector(comps));
+            }
+        }
+        return values;
+    }
+
+    private double readCell(String name, TextField cell, String where) {
+        try {
+            return Interpreter.evaluateEntry(cell.getText());
+        } catch (Exception e) {
+            if (!cell.getStyleClass().contains("field-error")) {
+                cell.getStyleClass().add("field-error");
+            }
+            throw new CommandException(name + " (" + where + "): " + errorMessage(e));
+        }
     }
 
     // =====================================================================
@@ -270,30 +476,59 @@ public class PrimaryController {
      * Double -> Label with Vector.formatNumber, anything else -> Label with toString().
      */
     private Node toDisplay(Object result) {
-        // TODO Task 5
-        return new VBox();
+        if (result instanceof Matrix m) {
+            return buildBracketed(m);
+        }
+        if (result instanceof Vector v) {
+            return buildBracketed(Matrix.convertToMatrix(v));
+        }
+        if (result instanceof Double d) {
+            return new Label(Vector.formatNumber(d));
+        }
+        return new Label(String.valueOf(result));
     }
 
     /** Grid of Labels between two bracket Regions ("bracket-left" / "bracket-right"). */
     private Node buildBracketed(Matrix matrix) {
-        // TODO Task 5.5
-        return new HBox();
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        for (int r = 0; r < matrix.getNumRows(); r++) {
+            for (int c = 0; c < matrix.getNumCols(); c++) {
+                grid.add(new Label(Vector.formatNumber(matrix.get(r, c))), c, r);
+            }
+        }
+        HBox box = new HBox(4, bracket("bracket-left"), grid, bracket("bracket-right"));
+        box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        return box;
     }
 
     /** Adds to outputBox: the command ("output-command") and below it the result ("output-value"). */
     private void addOutput(String command, Node result) {
-        // TODO Task 4.2 (+ scroll outputScroll to the bottom)
+        Label cmd = new Label(command);
+        cmd.getStyleClass().add("output-command");
+        result.getStyleClass().add("output-value");
+        outputBox.getChildren().add(new VBox(2, cmd, result));
+        scrollOutput();
     }
 
     /** Adds to outputBox: the command and below it "Error: message" ("output-error"). */
     private void addError(String command, String message) {
-        // TODO Task 4.3 (+ scroll outputScroll to the bottom)
+        Label cmd = new Label(command);
+        cmd.getStyleClass().add("output-command");
+        Label err = new Label("Error: " + message);
+        err.setWrapText(true);
+        err.getStyleClass().add("output-error");
+        outputBox.getChildren().add(new VBox(2, cmd, err));
+        scrollOutput();
+    }
+
+    private void scrollOutput() {
+        Platform.runLater(() -> outputScroll.setVvalue(1.0));
     }
 
     /** The exception's message, or its simple class name if the message is null. */
     private String errorMessage(Exception e) {
-        // TODO Task 4.1
-        return "";
+        return e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
     }
 
     // =====================================================================
