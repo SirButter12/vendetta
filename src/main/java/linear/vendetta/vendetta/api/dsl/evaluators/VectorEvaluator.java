@@ -63,7 +63,11 @@ public class VectorEvaluator {
         expectArgs("direction", args, 1);
         
         if (args.get(0) instanceof Vector v) {
-            return new Vector(v.getDirection()); //provicional
+            try {
+                return new Vector(v.getDirection()); //provicional
+            } catch (ArithmeticException e) {
+                throw new CommandException("The zero vector has no direction");
+            }
         }
         
         throw new CommandException("Invalid argument for function");

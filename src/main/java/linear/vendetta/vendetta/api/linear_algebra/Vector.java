@@ -20,9 +20,10 @@ public class Vector implements operable<Vector> {
 
     /** The components of the vector in order: x, y, z, ... */
     protected List<Double> values;
-    protected double length;
-    protected List<Double> direction;
-    
+    // length and direction are NOT stored: they are computed on demand in
+    // getLen() / getDirection(), so they can never go stale and the zero
+    // vector (used everywhere internally) can still be built.
+
     /** How many components the vector has. Always equals values.size(). */
     private int dimension;
 
@@ -45,16 +46,12 @@ public class Vector implements operable<Vector> {
         }
         this.values = validatedCopy(doubles);
         this.dimension = this.values.size();
-        calcLen();
-        directionAngles();
     }
 
     /** Copy constructor. */
     public Vector(Vector v) {
         this.values = new ArrayList<>(v.values);
         this.dimension = v.dimension;
-        calcLen();
-        directionAngles();
     }
 
     /**
@@ -69,8 +66,6 @@ public class Vector implements operable<Vector> {
         }
         this.values = new ArrayList<>(Collections.nCopies(dimension, 0.0));
         this.dimension = dimension;
-        calcLen();
-        directionAngles();
     }
 
 
@@ -97,20 +92,25 @@ public class Vector implements operable<Vector> {
         return values.get(index);
     }
     
+    /** Length (Euclidean norm). Computed from the current components. */
     public double getLen() {
-        return length;
+        return calcLen();
     }
-    
+
+    /**
+     * Direction angles in radians (polar / hyperspherical form), n-1 angles
+     * for n components. See directionAngles().
+     *
+     * @throws ArithmeticException for the zero vector
+     */
     public List<Double> getDirection() {
-        return this.direction;
+        return directionAngles();
     }
 
     /** Sets the component at index (0-based). In place. */
     public void set(int index, double value) {
         Objects.checkIndex(index, dimension);
         values.set(index, value);
-        calcLen();
-        directionAngles();
     }
 
 
@@ -222,29 +222,34 @@ public class Vector implements operable<Vector> {
      *
      * @return la longitud, siempre >= 0
      */
-    public void calcLen() {
+    private double calcLen() {
         double len = 0;
 
         for (double value: values) {
             len += value * value;
         }
 
-        this.length = Math.sqrt(len);
+        return Math.sqrt(len);
     }
 
-   
-    public void directionAngles() {
-        if (length == 0.0) {
+    /**
+     * Hyperspherical angles (radians). 2D: [theta] with theta = atan2(y, x).
+     * nD: phi_k = atan2(|(x_{k+1}, ..., x_n)|, x_k) for k < n-1,
+     * last one = atan2(x_n, x_{n-1}). 1D: [0] if positive, [pi] if negative.
+     *
+     * @throws ArithmeticException for the zero vector
+     */
+    private List<Double> directionAngles() {
+        if (calcLen() == 0.0) {
             throw new ArithmeticException("The zero vector has no direction.");
         }
 
         int n = dimension;
-        Double[] angles = new Double[Math.max(n - 1, 0)];
         if (n < 2) {
-            this.direction = new ArrayList<>();
-            direction.add(0.0);
-            return;
+            return List.of(values.get(0) < 0 ? Math.PI : 0.0);
         }
+
+        Double[] angles = new Double[n - 1];
         angles[n - 2] = Math.atan2(values.get(n - 1), values.get(n - 2));
 
         double tail = Math.hypot(values.get(n - 1), values.get(n - 2));
@@ -253,7 +258,41 @@ public class Vector implements operable<Vector> {
             tail = Math.hypot(tail, values.get(k));
         }
 
-        this.direction = List.of(angles);
+        return List.of(angles);
+    }
+    
+        /**
+     * Builds a vector from its polar (hyperspherical) form. Inverse of getDirection():
+     * x1 = r cos t1, x2 = r sin t1 cos t2, ..., xn = r sin t1 ... sin t(n-1).
+     * No angles -> 1D vector [r] (r may be negative).
+     *
+     * @throws IllegalArgumentException if r < 0 and there are angles
+     */
+    public static Vector fromPolar(double r, List<Double> angles) {
+        if (r < 0 && !angles.isEmpty()) {
+            throw new IllegalArgumentException("The length cannot be negative.");
+        }
+        List<Double> comps = new ArrayList<>(angles.size() + 1);
+        double sinProduct = r;
+        for (double angle : angles) {
+            comps.add(snap(sinProduct * Math.cos(angle), r));
+            sinProduct *= Math.sin(angle);
+        }
+        comps.add(snap(sinProduct, r));
+        return new Vector(comps);
+    }
+
+    /** Polar form of this vector. 1D: no angles, signed length. */
+    public PolarForm toPolar() {
+        if (dimension == 1) {
+            return new PolarForm(values.get(0), List.of());
+        }
+        return new PolarForm(getLen(), getDirection());
+    }
+
+    /** cos(pi/2) gives 6e-17 instead of 0: treat tiny values (relative to r) as 0. */
+    private static double snap(double x, double r) {
+        return Math.abs(x) < 1e-12 * Math.max(1.0, Math.abs(r)) ? 0.0 : x;
     }
 
     /**
