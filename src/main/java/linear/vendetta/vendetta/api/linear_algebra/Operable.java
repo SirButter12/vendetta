@@ -6,7 +6,7 @@ package linear.vendetta.vendetta.api.linear_algebra;
  *
  * @author Alex
  */
-public interface operable<T>{
+public interface Operable<T>{
     /** Element-wise this + a. */
     T add(T a);
     /** Element-wise this - a. */

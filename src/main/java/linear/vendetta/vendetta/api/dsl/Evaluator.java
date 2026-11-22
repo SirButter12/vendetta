@@ -13,9 +13,9 @@ import static linear.vendetta.vendetta.api.dsl.evaluators.MatrixEvaluator.*;
 import static linear.vendetta.vendetta.api.dsl.evaluators.ArithmeticEvaluator.*;
 import static linear.vendetta.vendetta.api.dsl.evaluators.VectorEvaluator.*;
 import linear.vendetta.vendetta.api.linear_algebra.SolutionVector;
-import static linear.vendetta.vendetta.api.helpers.expectArgs;
-import static linear.vendetta.vendetta.api.helpers.toSize;
-import static linear.vendetta.vendetta.api.helpers.wrongArgs;
+import static linear.vendetta.vendetta.api.Helpers.expectArgs;
+import static linear.vendetta.vendetta.api.Helpers.toSize;
+import static linear.vendetta.vendetta.api.Helpers.wrongArgs;
 
 /**
  * Walks a Node tree and computes its value (Double, Vector or Matrix).

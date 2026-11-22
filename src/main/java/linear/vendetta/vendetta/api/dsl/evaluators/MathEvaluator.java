@@ -2,7 +2,7 @@ package linear.vendetta.vendetta.api.dsl.evaluators;
 
 import java.util.List;
 import linear.vendetta.vendetta.api.dsl.CommandException;
-import static linear.vendetta.vendetta.api.helpers.expectArgs;
+import static linear.vendetta.vendetta.api.Helpers.expectArgs;
 
 /**
  * Scalar math functions. Each one checks the argument count and type,

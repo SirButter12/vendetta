@@ -7,7 +7,7 @@ package linear.vendetta.vendetta.api.linear_algebra;
  *
  * @author Alex, Ian
  */
-public interface elementalOperations<T> {
+public interface ElementalOperations<T> {
     /** R_idx = a * R_idx */
     String rowMultiply(double a, int idx);
     /** {@code R_idx1 <-> R_idx2} */

@@ -4,9 +4,9 @@ import java.util.List;
 import linear.vendetta.vendetta.api.linear_algebra.Matrix;
 import linear.vendetta.vendetta.api.linear_algebra.Vector;
 import linear.vendetta.vendetta.api.dsl.CommandException;
-import static linear.vendetta.vendetta.api.helpers.expectArgs;
-import static linear.vendetta.vendetta.api.helpers.wrongArgs;
-import static linear.vendetta.vendetta.api.helpers.typeName;
+import static linear.vendetta.vendetta.api.Helpers.expectArgs;
+import static linear.vendetta.vendetta.api.Helpers.wrongArgs;
+import static linear.vendetta.vendetta.api.Helpers.typeName;
 
 /**
  * Operators + - * / ^ and dot(), for every supported type combination.

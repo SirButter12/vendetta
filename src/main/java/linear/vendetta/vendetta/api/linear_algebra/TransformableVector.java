@@ -1,6 +1,6 @@
 package linear.vendetta.vendetta.api.linear_algebra;
 
-import linear.vendetta.vendetta.api.helpers;
+import linear.vendetta.vendetta.api.Helpers;
 import java.util.Collections;
 
 /**
@@ -10,7 +10,7 @@ import java.util.Collections;
  *
  * @author ian
  */
-public class TransformableVector extends Vector implements elementalOperations {
+public class TransformableVector extends Vector implements ElementalOperations {
 
     /** Copy of v that can be transformed. */
     public TransformableVector(Vector v) {
@@ -21,20 +21,20 @@ public class TransformableVector extends Vector implements elementalOperations {
     @Override
     public String rowMultiply(double a, int idx) {
         super.set(idx, this.values.get(idx) * a);
-        return helpers.rowMultiplyStep(a, idx);
+        return Helpers.rowMultiplyStep(a, idx);
     }
 
     /** Swaps b[idx1] and b[idx2]. In place, returns the step text. */
     @Override
     public String rowSwap(int idx1, int idx2) {
         Collections.swap(this.values, idx1, idx2);
-        return helpers.rowSwapStep(idx1, idx2);
+        return Helpers.rowSwapStep(idx1, idx2);
     }
 
     /** b[idx1] = b[idx1] + k * b[idx2]. In place, returns the step text. */
     @Override
     public String rowComp(int idx1, int idx2, double k) {
         super.set(idx1, this.values.get(idx1) + this.values.get(idx2) * k);
-        return helpers.rowCompStep(idx1, idx2, k);
+        return Helpers.rowCompStep(idx1, idx2, k);
     }
 }

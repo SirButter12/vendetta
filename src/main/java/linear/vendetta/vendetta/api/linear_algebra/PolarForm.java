@@ -1,6 +1,6 @@
 package linear.vendetta.vendetta.api.linear_algebra;
 
-import linear.vendetta.vendetta.api.helpers;
+import linear.vendetta.vendetta.api.Helpers;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +26,8 @@ public record PolarForm(double length, List<Double> angles) {
     public String toString() {
         List<String> a = new ArrayList<>();
         for (double x : angles) {
-            a.add(helpers.formatNumber(x));
+            a.add(Helpers.formatNumber(x));
         }
-        return "{length: " + helpers.formatNumber(length) + ", angles: [" + String.join(", ", a) + "]}";
+        return "{length: " + Helpers.formatNumber(length) + ", angles: [" + String.join(", ", a) + "]}";
     }
 }

@@ -1,6 +1,6 @@
 package linear.vendetta.vendetta.api.linear_algebra;
 
-import linear.vendetta.vendetta.api.helpers;
+import linear.vendetta.vendetta.api.Helpers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.Objects;
  *
  * @author Alex, Ian
  */
-public class Vector implements operable<Vector> {
+public class Vector implements Operable<Vector> {
 
 
     /** The components of the vector in order: x, y, z, ... */
@@ -341,7 +341,7 @@ public class Vector implements operable<Vector> {
         StringBuilder text = new StringBuilder("[");
         for (int i = 0; i < dimension; i++) {
             if (i > 0) text.append(", ");
-            text.append(helpers.formatNumber(values.get(i)));
+            text.append(Helpers.formatNumber(values.get(i)));
         }
         return text.append("]").toString();
     }

@@ -17,9 +17,9 @@ import linear.vendetta.vendetta.api.linear_algebra.Vector;
  *
  * @author ian
  */
-public final class helpers {
+public final class Helpers {
 
-    private helpers() { }
+    private Helpers() { }
 
 
 
