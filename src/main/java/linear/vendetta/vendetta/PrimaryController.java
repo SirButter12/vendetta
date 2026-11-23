@@ -37,13 +37,9 @@ import linear.vendetta.vendetta.api.linear_algebra.Vector;
  * Note: javafx.scene.Node is used here for UI nodes. The API also has a class
  * called Node (api.dsl.Node) but the controller never needs it, so don't import it.
  *
- * @author Matthews
+ * @author Matthew Lincz, Adrian, Ian
  */
 public class PrimaryController {
-
-    // =====================================================================
-    // FXML fields. Names and types MUST match INTERFACE.md section 11.
-    // =====================================================================
 
     /** Window root. */
     @FXML
@@ -81,9 +77,7 @@ public class PrimaryController {
     @FXML
     private ScrollPane inputScroll;
 
-    // =====================================================================
     // State
-    // =====================================================================
 
     /** Pixels per unit on the Cartesian plane (one grid square). */
     private static final int SCALE = 15;
@@ -109,9 +103,7 @@ public class PrimaryController {
     /** The active (last) Input line. */
     private TextField currentLine;
 
-    // =====================================================================
     // FXML entry points
-    // =====================================================================
 
     /**
      * Called automatically by FXMLLoader after the @FXML fields are filled.
@@ -326,9 +318,7 @@ public class PrimaryController {
         return name.matches("[A-Za-z][A-Za-z0-9]*") ? name : null;
     }
 
-    // =====================================================================
     // Cards (Matrices / Vectors sections)
-    // =====================================================================
 
     /**
      * Creates the card of a variable, or replaces it if it already exists
@@ -545,7 +535,7 @@ public class PrimaryController {
 
     /**
      * Red arrow from the origin to (x, y) with the name next to the tip.
-     * Pixel position: (centerX + x * SCALE, centerY - y * SCALE)  <- minus: screen y goes down.
+     * Pixel position: (centerX + x * SCALE, centerY - y * SCALE)
      */
     private void drawVector(String name, double x, double y) {
         // TODO Task 10.2
