@@ -3,8 +3,9 @@ package linear.vendetta.vendetta.api.dsl.evaluators;
 import java.util.List;
 import linear.vendetta.vendetta.api.linear_algebra.Matrix;
 import linear.vendetta.vendetta.api.dsl.CommandException;
-import static linear.vendetta.vendetta.api.dsl.Evaluator.expectArgs;
-import static linear.vendetta.vendetta.api.dsl.Evaluator.toSize;
+import static linear.vendetta.vendetta.api.Helpers.expectArgs;
+import static linear.vendetta.vendetta.api.Helpers.wrongArgs;
+import static linear.vendetta.vendetta.api.Helpers.toSize;
 /**
  * Matrix functions callable from commands.
  *
@@ -19,7 +20,7 @@ public class MatrixEvaluator {
             return Matrix.adj(m);
         }
 
-        throw new CommandException("Invalid argument for function");
+        throw wrongArgs("adj(M)", "a matrix M", args);
     }
 
     /** inv(M): inverse. */
@@ -30,7 +31,7 @@ public class MatrixEvaluator {
             return Matrix.inverse(m);
         }
 
-        throw new CommandException("Invalid argument for function");
+        throw wrongArgs("inv(M)", "a matrix M", args);
     }
 
     /** trans(M): transpose. */
@@ -41,7 +42,7 @@ public class MatrixEvaluator {
             return m.transpose();
         }
 
-        throw new CommandException("Invalid argument for function");
+        throw wrongArgs("trans(M)", "a matrix M", args);
     }
 
     /** det(M): determinant (square only). */
@@ -53,7 +54,7 @@ public class MatrixEvaluator {
             return m.getDeterminant();
         }
 
-        throw new CommandException("Invalid argument for function");
+        throw wrongArgs("det(M)", "a matrix M", args);
     }
 
     /** triangulize(M): row echelon form (Gaussian elimination). */

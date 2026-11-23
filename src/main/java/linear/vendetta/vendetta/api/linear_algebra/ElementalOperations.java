@@ -5,9 +5,9 @@ package linear.vendetta.vendetta.api.linear_algebra;
  * Each one changes the object IN PLACE and returns the step as text,
  * e.g. {@code "R_0 <-> R_2"}, so it can be shown to the user.
  *
- * @author Alex
+ * @author Alex, Ian
  */
-public interface elementalOperations<T> {
+public interface ElementalOperations<T> {
     /** R_idx = a * R_idx */
     String rowMultiply(double a, int idx);
     /** {@code R_idx1 <-> R_idx2} */

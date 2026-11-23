@@ -1,5 +1,6 @@
 package linear.vendetta.vendetta.api.linear_algebra;
- 
+
+import linear.vendetta.vendetta.api.Helpers; 
 import java.util.ArrayList;
 import java.util.List;
  
@@ -59,7 +60,7 @@ public class SystemMatrix extends Matrix{
         for (int r = 0; r < m; r++) {
             if (isZeroRow(triang, r, tolA) && Math.abs(b.get(r)) > tolB) {
                 throw new MultipleOrNoSolutionException("The system has no solution (row " + r
-                        + " reads 0 = " + Vector.formatNumber(b.get(r)) + ").");
+                        + " reads 0 = " + Helpers.formatNumber(b.get(r)) + ").");
             }
         }
  

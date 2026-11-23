@@ -8,11 +8,7 @@ package linear.vendetta.vendetta.api.dsl;
  */
 public class CommandException extends RuntimeException {
 
-    /** No message. */
-    public CommandException() {
-    }
-
-    /** @param msg text shown to the user */
+    /** @param msg text shown to the user. Always give one: the UI shows it as is. */
     public CommandException(String msg) {
         super(msg);
     }

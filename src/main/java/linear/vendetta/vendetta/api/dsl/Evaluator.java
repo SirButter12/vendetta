@@ -13,6 +13,9 @@ import static linear.vendetta.vendetta.api.dsl.evaluators.MatrixEvaluator.*;
 import static linear.vendetta.vendetta.api.dsl.evaluators.ArithmeticEvaluator.*;
 import static linear.vendetta.vendetta.api.dsl.evaluators.VectorEvaluator.*;
 import linear.vendetta.vendetta.api.linear_algebra.SolutionVector;
+import static linear.vendetta.vendetta.api.Helpers.expectArgs;
+import static linear.vendetta.vendetta.api.Helpers.toSize;
+import static linear.vendetta.vendetta.api.Helpers.wrongArgs;
 
 /**
  * Walks a Node tree and computes its value (Double, Vector or Matrix).
@@ -72,22 +75,6 @@ public class Evaluator {
     }
 
     /**
-     * True if both are Matrices with the same rows x cols,
-     * or both are Vectors with the same dimension.
-     */
-    public static boolean sameShape(Object a, Object b) {
-        if (a instanceof Matrix m1 && b instanceof Matrix m2) {
-            return m1.getNumRows() == m2.getNumRows() && m1.getNumCols() == m2.getNumCols();
-        }
-
-        if (a instanceof Vector v1 && b instanceof Vector v2) {
-            return v1.getDimension() == v2.getDimension();
-        }
-
-        return false;
-    }
-
-    /**
      * Value of a variable.
      *
      * @throws CommandException if it does not exist
@@ -136,6 +123,10 @@ public class Evaluator {
         }
 
         return switch(node.text()) {
+            case "length" -> length(args);
+            case "direction" -> direction(args);    
+            case "polarV" -> polarV(args);
+            case "polarize" -> polarize(args);    
             case "adj" -> adj(args);
             case "inv" -> inv(args);
             case "trans" -> trans(args);
@@ -181,7 +172,7 @@ public class Evaluator {
             return systemMatrix.solve();
         }
 
-        throw new CommandException("Invalid arguments");
+        throw wrongArgs("solveSystem(A, b)", "a matrix A and a vector b", args);
     }
 
     /** gaussJordan(A, b): solves Ax = b with Gauss-Jordan and prints the steps to stdout. */
@@ -201,7 +192,7 @@ public class Evaluator {
             return s;
         }
 
-        throw new CommandException("Invalid arguments");
+        throw wrongArgs("gaussJordan(A, b)", "a matrix A and a vector b", args);
     }
 
     /**
@@ -239,24 +230,5 @@ public class Evaluator {
         }
 
         throw new CommandException("A list must contain only numbers (vector) or only vectors (matrix rows)");
-    }
-
-    /** @throws CommandException if args does not have exactly n elements */
-    public static void expectArgs(String fn, List<Object> args, int n) {
-        if (args.size() != n) {
-            throw new CommandException(fn + " needs " + n + " argument(s)");
-        }
-    }
-
-    /**
-     * Value -> positive whole number (for sizes).
-     *
-     * @throws CommandException otherwise
-     */
-    public static int toSize(Object o) {
-        if (o instanceof Double d && d == Math.floor(d) && d > 0) {
-            return d.intValue();
-        }
-        throw new CommandException("Sizes must be whole positive numbers");
     }
 }

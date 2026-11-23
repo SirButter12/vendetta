@@ -13,10 +13,10 @@ import java.io.IOException;
  * 
  * @author Ian, Adrian, Matthews
  */
-public class App extends Application {
+public class App extends Application{
 
     private static Scene scene;
-
+    
     @Override
     public void start(Stage stage) throws IOException {
         scene = new Scene(loadFXML("primary"));
@@ -33,7 +33,7 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
     }
-
+    
     /** The emotional support coconut. Lives next to the FXML files in resources. */
     private static final String COCONUT = "coconut.jpg";
 
@@ -67,7 +67,7 @@ public class App extends Application {
 
     public static void main(String[] args) {
         checkCoconut();
-
+        
         if (args.length > 0 && args[0].equals("--console")) {
             ConsoleApp.main(args);   
         } else {

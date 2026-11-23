@@ -1,9 +1,9 @@
 package linear.vendetta.vendetta.api.linear_algebra;
 
+import linear.vendetta.vendetta.api.Helpers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 
@@ -11,15 +11,16 @@ import java.util.Objects;
  * Vector of doubles with at least 1 component.
  * Operations return NEW vectors; only set() and setValues() modify this one.
  *
- * @author Alex
+ * @author Alex, Ian
  */
-public class Vector implements operable<Vector> {
-    /** Max decimals shown by toString() / formatNumber(). Display only. */
-    private static final int DISPLAY_DECIMALS = 4;
+public class Vector implements Operable<Vector> {
 
 
     /** The components of the vector in order: x, y, z, ... */
     protected List<Double> values;
+    // length and direction are NOT stored: they are computed on demand in
+    // getLen() / getDirection(), so they can never go stale and the zero
+    // vector (used everywhere internally) can still be built.
 
     /** How many components the vector has. Always equals values.size(). */
     private int dimension;
@@ -87,6 +88,21 @@ public class Vector implements operable<Vector> {
     public double get(int index) {
         Objects.checkIndex(index, dimension);
         return values.get(index);
+    }
+    
+    /** Length (Euclidean norm). Computed from the current components. */
+    public double getLen() {
+        return calcLen();
+    }
+
+    /**
+     * Direction angles in radians (polar / hyperspherical form), n-1 angles
+     * for n components. See directionAngles().
+     *
+     * @throws ArithmeticException for the zero vector
+     */
+    public List<Double> getDirection() {
+        return directionAngles();
     }
 
     /** Sets the component at index (0-based). In place. */
@@ -198,6 +214,84 @@ public class Vector implements operable<Vector> {
 
         return v.scalarMult(factor);
     }
+    
+    /**
+     * Longitud (norma euclidiana) del vector: sqrt(x1² + x2² + ... + xn²).
+     *
+     * @return la longitud, siempre >= 0
+     */
+    private double calcLen() {
+        double len = 0;
+
+        for (double value: values) {
+            len += value * value;
+        }
+
+        return Math.sqrt(len);
+    }
+
+    /**
+     * Hyperspherical angles (radians). 2D: [theta] with theta = atan2(y, x).
+     * nD: phi_k = atan2(|(x_{k+1}, ..., x_n)|, x_k) for k < n-1,
+     * last one = atan2(x_n, x_{n-1}). 1D: [0] if positive, [pi] if negative.
+     *
+     * @throws ArithmeticException for the zero vector
+     */
+    private List<Double> directionAngles() {
+        if (calcLen() == 0.0) {
+            throw new ArithmeticException("The zero vector has no direction.");
+        }
+
+        int n = dimension;
+        if (n < 2) {
+            return List.of(values.get(0) < 0 ? Math.PI : 0.0);
+        }
+
+        Double[] angles = new Double[n - 1];
+        angles[n - 2] = Math.atan2(values.get(n - 1), values.get(n - 2));
+
+        double tail = Math.hypot(values.get(n - 1), values.get(n - 2));
+        for (int k = n - 3; k >= 0; k--) {
+            angles[k] = Math.atan2(tail, values.get(k));
+            tail = Math.hypot(tail, values.get(k));
+        }
+
+        return List.of(angles);
+    }
+    
+        /**
+     * Builds a vector from its polar (hyperspherical) form. Inverse of getDirection():
+     * x1 = r cos t1, x2 = r sin t1 cos t2, ..., xn = r sin t1 ... sin t(n-1).
+     * No angles -> 1D vector [r] (r may be negative).
+     *
+     * @throws IllegalArgumentException if r < 0 and there are angles
+     */
+    public static Vector fromPolar(double r, List<Double> angles) {
+        if (r < 0 && !angles.isEmpty()) {
+            throw new IllegalArgumentException("The length cannot be negative.");
+        }
+        List<Double> comps = new ArrayList<>(angles.size() + 1);
+        double sinProduct = r;
+        for (double angle : angles) {
+            comps.add(snap(sinProduct * Math.cos(angle), r));
+            sinProduct *= Math.sin(angle);
+        }
+        comps.add(snap(sinProduct, r));
+        return new Vector(comps);
+    }
+
+    /** Polar form of this vector. 1D: no angles, signed length. */
+    public PolarForm toPolar() {
+        if (dimension == 1) {
+            return new PolarForm(values.get(0), List.of());
+        }
+        return new PolarForm(getLen(), getDirection());
+    }
+
+    /** cos(pi/2) gives 6e-17 instead of 0: treat tiny values (relative to r) as 0. */
+    private static double snap(double x, double r) {
+        return Math.abs(x) < 1e-12 * Math.max(1.0, Math.abs(r)) ? 0.0 : x;
+    }
 
     /**
      * n x 1 (column) matrix -> Vector.
@@ -241,13 +335,13 @@ public class Vector implements operable<Vector> {
         return result;
     }
 
-    /** Display text, e.g. [1, 2.5, -3]. Numbers go through formatNumber(). */
+    /** Display text, e.g. [1, 2.5, -3]. Numbers go through helpers.formatNumber(). */
     @Override
     public String toString() {
         StringBuilder text = new StringBuilder("[");
         for (int i = 0; i < dimension; i++) {
             if (i > 0) text.append(", ");
-            text.append(formatNumber(values.get(i)));
+            text.append(Helpers.formatNumber(values.get(i)));
         }
         return text.append("]").toString();
     }
@@ -307,23 +401,5 @@ public class Vector implements operable<Vector> {
      */
     private static double clean(double x) {
         return x + 0.0;
-    }
-
-
-    /**
-     * Number -> short display text: up to DISPLAY_DECIMALS decimals,
-     * no trailing zeros, always '.' as decimal point, -0 shown as 0.
-     * e.g. 2.0 -> "2", 1/3.0 -> "0.3333". NaN/Infinity printed as is.
-     */
-    public static String formatNumber(double x) {
-        if (Double.isNaN(x) || Double.isInfinite(x)) {
-            return String.valueOf(x);
-        }
-        // Locale.ROOT forces a "." decimal point even on a French (comma) computer.
-        String text = String.format(Locale.ROOT, "%." + DISPLAY_DECIMALS + "f", x);
-        if (text.contains(".")) {
-            text = text.replaceAll("0+$", "").replaceAll("\\.$", "");   // trim trailing zeros
-        }
-        return text.equals("-0") ? "0" : text;
     }
 }

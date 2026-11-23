@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import linear.vendetta.vendetta.api.Helpers;
 import linear.vendetta.vendetta.api.linear_algebra.Matrix;
 import linear.vendetta.vendetta.api.linear_algebra.Vector;
 import linear.vendetta.vendetta.api.dsl.Node.NodeKind;
@@ -119,7 +120,7 @@ public class Interpreter {
             if (value == null) {
                 throw new CommandException("Missing the values of " + tree.text());
             }
-            if (!Evaluator.sameShape(Evaluator.buildEmpty(tree), value)) {
+            if (!Helpers.sameShape(Evaluator.buildEmpty(tree), value)) {
                 throw new CommandException(tree.text() + " must be a " + Evaluator.describe(tree));
             }
         }

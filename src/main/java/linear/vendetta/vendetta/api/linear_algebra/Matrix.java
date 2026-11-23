@@ -1,5 +1,6 @@
 package linear.vendetta.vendetta.api.linear_algebra;
 
+import linear.vendetta.vendetta.api.Helpers;
 import static java.lang.Double.NaN;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +19,7 @@ import java.util.Objects;
  *
  * @author Matthew, Ian, Adrian
  */
-public class Matrix implements operable<Matrix>, elementalOperations {
+public class Matrix implements Operable<Matrix>, ElementalOperations {
     protected List<Vector> rows;                            // one Vector per row
     protected int[] size = new int[2];                      // {numRows, numCols}
     protected double detSign;                               // +1/-1 from row swaps in the last toTriangle()
@@ -412,7 +413,9 @@ public class Matrix implements operable<Matrix>, elementalOperations {
      */
     public static Matrix multiply(Matrix m1, Matrix m2) {
         if (m1.getNumCols() != m2.getNumRows()) {
-            throw new IllegalArgumentException("Not valid sizes");
+            throw new IllegalArgumentException("Can't multiply a " + m1.getNumRows() + "x" + m1.getNumCols()
+                    + " matrix by a " + m2.getNumRows() + "x" + m2.getNumCols()
+                    + " matrix: the first one's columns must equal the second one's rows");
         }
 
         List<Vector> vectorsm1 = m1.getRows();
@@ -439,6 +442,11 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
     /** m1 * v, with v used as a column vector. Returns a Vector. */
     public static Vector multiply(Matrix m1, Vector v) {
+        if (m1.getNumCols() != v.getDimension()) {
+            throw new IllegalArgumentException("Can't multiply a " + m1.getNumRows() + "x" + m1.getNumCols()
+                    + " matrix by a vector of dimension " + v.getDimension()
+                    + ": the vector needs as many components as the matrix has columns");
+        }
         Matrix m2 = Matrix.convertToMatrix(v);
 
         return Vector.convertToVector(Matrix.multiply(m1, m2));
@@ -495,7 +503,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         this.rows.set(idx, this.rows.get(idx).scalarMult(a));
         invalidateDeterminant();
 
-        return String.format("R_%d -> R_%d * %s\n", idx, idx, Vector.formatNumber(a));
+        return Helpers.rowMultiplyStep(a, idx);
     }
 
 
@@ -505,7 +513,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         Collections.swap(this.rows, idx1, idx2);
         invalidateDeterminant();
 
-        return String.format("R_%d <-> R_%d\n", idx1, idx2);
+        return Helpers.rowSwapStep(idx1, idx2);
     }
 
 
@@ -517,7 +525,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
 
         this.rows.set(idx1, target.add(source.scalarMult(k)));
         invalidateDeterminant();    // does not change det in exact math, but it can change the rounding
-        return String.format("R_%d -> R_%d + %s * R_%d\n", idx1, idx1, Vector.formatNumber(k), idx2);
+        return Helpers.rowCompStep(idx1, idx2, k);
     }
 
     //--- Misc methods---
@@ -662,7 +670,7 @@ public class Matrix implements operable<Matrix>, elementalOperations {
         int[] widths = new int[numCols];
         for (int r = 0; r < numRows; r++) {
             for (int c = 0; c < numCols; c++) {
-                cells[r][c] = Vector.formatNumber(get(r, c));
+                cells[r][c] = Helpers.formatNumber(get(r, c));
                 widths[c] = Math.max(widths[c], cells[r][c].length());
             }
         }
