@@ -20,6 +20,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import linear.vendetta.vendetta.api.Helpers;
 
 import linear.vendetta.vendetta.api.dsl.CommandException;
 import linear.vendetta.vendetta.api.dsl.CompiledResult;
@@ -386,7 +387,7 @@ public class PrimaryController {
     }
 
     private TextField newCell(double value, boolean editable) {
-        TextField cell = new TextField(Vector.formatNumber(value));
+        TextField cell = new TextField(Helpers.formatNumber(value));
         cell.getStyleClass().add(editable ? "cell-field" : "cell-readonly");
         cell.setEditable(editable);
         cell.setPrefColumnCount(4);
@@ -469,7 +470,7 @@ public class PrimaryController {
             return buildBracketed(Matrix.convertToMatrix(v));
         }
         if (result instanceof Double d) {
-            return new Label(Vector.formatNumber(d));
+            return new Label(Helpers.formatNumber(d));
         }
         return new Label(String.valueOf(result));
     }
@@ -480,7 +481,7 @@ public class PrimaryController {
         grid.setHgap(10);
         for (int r = 0; r < matrix.getNumRows(); r++) {
             for (int c = 0; c < matrix.getNumCols(); c++) {
-                grid.add(new Label(Vector.formatNumber(matrix.get(r, c))), c, r);
+                grid.add(new Label(Helpers.formatNumber(matrix.get(r, c))), c, r);
             }
         }
         HBox box = new HBox(4, bracket("bracket-left"), grid, bracket("bracket-right"));

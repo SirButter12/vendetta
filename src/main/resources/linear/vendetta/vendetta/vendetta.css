@@ -105,3 +105,21 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-border-color: #304C37;
     -fx-border-width: 1px 0 0 0;
 }
+/* ---- Classes from INTERFACE.md section 11 (minimal version, Adrian can restyle) ---- */
+.panel { -fx-background-color: #1f4d3a; -fx-text-fill: white; }
+.panel .scroll-pane, .panel .scroll-pane > .viewport { -fx-background-color: transparent; }
+.panel-title { -fx-text-fill: white; -fx-font-weight: bold; -fx-alignment: center; }
+.tool-button { -fx-background-color: #d9d9d9; -fx-text-fill: #222; -fx-background-radius: 0; }
+.graph-pane { -fx-background-color: white; }
+.card { -fx-spacing: 4; -fx-alignment: center-left; }
+.card-name { -fx-text-fill: white; -fx-font-weight: bold; }
+.cell-field, .cell-readonly { -fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: center; -fx-pref-width: 45; -fx-border-width: 0; }
+.cell-readonly { -fx-opacity: 0.8; }
+.field-error { -fx-border-color: #ff5555; -fx-border-width: 1; }
+.bracket-left { -fx-border-color: white; -fx-border-width: 2 0 2 2; }
+.bracket-right { -fx-border-color: white; -fx-border-width: 2 2 2 0; }
+.command-line { -fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: transparent transparent white transparent; -fx-border-style: dotted; }
+.output-command { -fx-text-fill: white; -fx-font-weight: bold; }
+.output-value, .output-value .label { -fx-text-fill: white; -fx-padding: 0 0 0 12; }
+.output-error { -fx-text-fill: #ffb3b3; -fx-padding: 0 0 0 12; }
+.text-field { -fx-text-fill: #000000 }
