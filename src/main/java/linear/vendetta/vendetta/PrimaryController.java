@@ -199,9 +199,7 @@ public class PrimaryController {
         drawPlane();
     }
 
-    // =====================================================================
     // Input lines
-    // =====================================================================
 
     /** Creates a new empty Input line at the end of commandsBox and focuses it. */
     private void addInputLine() {
@@ -456,9 +454,7 @@ public class PrimaryController {
         }
     }
 
-    // =====================================================================
     // Output
-    // =====================================================================
 
     /**
      * Turns any API result into something the UI can show.
@@ -521,9 +517,7 @@ public class PrimaryController {
         return e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
     }
 
-    // =====================================================================
     // Cartesian plane
-    // =====================================================================
 
     /**
      * Clears graphPane and draws: dashed grid every SCALE px, x and y axes through
