@@ -131,7 +131,7 @@ public class Vector implements Operable<Vector> {
      */
     @Override
     public Vector add(Vector a) {
-        validateDimensions(a);
+        validateDimensions(this, a);
 
         Vector sum = new Vector(this);
 
@@ -158,7 +158,7 @@ public class Vector implements Operable<Vector> {
      * @throws IllegalArgumentException if dimensions differ
      */
     public double dotProduct(Vector a) {
-        validateDimensions(a);
+        validateDimensions(this, a);
         double sum = 0.0;
         for (int i = 0; i < dimension; i++) {
             sum += values.get(i) * a.values.get(i);
@@ -195,7 +195,51 @@ public class Vector implements Operable<Vector> {
         return new Vector(result);
     }
 
+    /**
+     * Angle between two vectors, in radians, from 0 to pi:
+     * acos( (v . u) / (|v| * |u|) ).
+     * The vectors can have different dimensions: the smaller one is padded with
+     * zeros up to the dimension of the bigger one, e.g. [1, 2] and [1, 2, 3]
+     * are compared as [1, 2, 0] and [1, 2, 3].
+     *
+     * @throws ArithmeticException if either vector is the zero vector (it has no direction)
+     */
+    public static double angleInBet(Vector v, Vector u) {
+    
+        int dimension = Math.max(v.dimension, u.dimension);
+        v = v.padTo(dimension);
+        u = u.padTo(dimension);
 
+        double vLen = v.getLen();
+        double uLen = u.getLen();
+        if (vLen == 0.0 || uLen == 0.0) {
+            throw new ArithmeticException("The angle with the zero vector is undefined.");
+        }
+
+        Vector a = v.scalarMult(uLen);
+        Vector b = u.scalarMult(vLen);
+        return 2 * Math.atan2(a.subtract(b).getLen(), a.add(b).getLen());
+    }
+
+    /**
+     * Copy of this vector with zeros added at the end up to the given dimension,
+     * e.g. [1, 2].padTo(3) = [1, 2, 0]. This vector is not modified.
+     *
+     * @throws IllegalArgumentException if dimension is smaller than this vector's dimension
+     */
+    public Vector padTo(int dimension) {
+        if (dimension < this.dimension) {
+            throw new IllegalArgumentException("Cannot pad a vector of dimension " + this.dimension
+                    + " down to dimension " + dimension + ".");
+        }
+
+        Vector padded = new Vector(this);
+        while (padded.values.size() < dimension) {
+            padded.values.add(0.0);
+        }
+        padded.dimension = dimension;
+        return padded;
+    }
 
     /**
      * Projection of this onto v: (this.v / v.v) * v.
@@ -203,7 +247,7 @@ public class Vector implements Operable<Vector> {
      * @throws ArithmeticException if v is the zero vector
      */
     public Vector projectOn(Vector v) {
-        validateDimensions(v);
+        validateDimensions(this, v);
 
         double vDotV = v.dotProduct(v);
         if (vDotV == 0.0) {
@@ -352,12 +396,12 @@ public class Vector implements Operable<Vector> {
      * @throws IllegalArgumentException if sizes differ
      * @throws NullPointerException if v is null
      */
-    private void validateDimensions(Vector v) {
+    private static void validateDimensions(Vector v, Vector u) {
         Objects.requireNonNull(v, "The other vector cannot be null.");
-        if (this.dimension != v.dimension) {
+        if (v.dimension != u.dimension) {
             throw new IllegalArgumentException(
                     "Vectors must have the same dimension, but got "
-                            + this.dimension + " and " + v.dimension + ".");
+                            + v.dimension + " and " + u.dimension + ".");
         }
     }
     /**

@@ -118,4 +118,14 @@ public class VectorEvaluator {
 
         throw wrongArgs("polarize(v)", "a vector v", args);
     }
+    
+    public static double angleInBet(List<Object> args) {
+        expectArgs("angleInBet", args, 2);
+        
+        if (args.get(0) instanceof Vector v && args.get(1) instanceof Vector u) {
+            return Vector.angleInBet(v, u);
+        }
+        
+        throw wrongArgs("angleInBet(v, u)", "two vectors v, u", args);
+    }
 }

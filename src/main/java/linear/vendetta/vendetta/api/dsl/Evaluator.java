@@ -137,6 +137,7 @@ public class Evaluator {
             case "solveSystem" -> solveSystem(args);
             case "gaussJordan" -> gaussJordan(args);
             case "triangulize" -> triangulize(args);
+            case "angleInBet" -> angleInBet(args);
 
             //MATH
             case "sin" -> sin(args);
@@ -183,11 +184,6 @@ public class Evaluator {
             SystemMatrix systemMatrix = new SystemMatrix(m, v);
 
             SolutionVector s =  systemMatrix.gaussJordan();
-
-            //delete eventually
-            for (String step: s.getSteps()) {
-                System.out.println(step);
-            }
 
             return s;
         }

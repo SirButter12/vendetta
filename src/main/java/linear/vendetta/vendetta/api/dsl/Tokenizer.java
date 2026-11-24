@@ -25,7 +25,7 @@ public class Tokenizer {
             "adj","inv","trans","det", "triangulize",
 
             //Vector
-            "dot", "cross", "project", "length", "direction", "polarV", "polarize",
+            "dot", "cross", "project", "length", "direction", "polarV", "polarize", "angleInBet",
 
             //System of equations
             "solveSystem", "gaussJordan",

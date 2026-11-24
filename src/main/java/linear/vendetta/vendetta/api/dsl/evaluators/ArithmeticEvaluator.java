@@ -106,6 +106,10 @@ public class ArithmeticEvaluator {
      * Matrix / Matrix -> a * inverse(b).
      */
     public static Object div(Object o1, Object o2) {
+        if (o2 instanceof Double d && d == 0.0) {
+            throw new CommandException("Cannot divide by zero");
+        }
+
         if (o1 instanceof Double x && o2 instanceof Double y) {
         return x / y;
         }

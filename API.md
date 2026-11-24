@@ -337,6 +337,8 @@ Indexes from 0. Arithmetic returns **new** vectors; `set`/`setValues` modify thi
 | `cross2D(v)` | Both 2D → number `a1·b2 − a2·b1` |
 | `cross3D(v)` | Both 3D → vector |
 | `projectOn(v)` | `(this·v / v·v) · v`. `ArithmeticException` if `v` is zero |
+| `angleInBet(v, u)` | Angle between `v` and `u` in radians (0 to π). Any dimension `ArithmeticException` if either is zero |
+| `padTo(n)` | Copy with zeros added at the end up to dimension `n`: `[1, 2].padTo(3)` = `[1, 2, 0]` |
 | `getLen()` | Euclidean length |
 | `getDirection()` | n−1 angles in radians (see 2.10). `ArithmeticException` for the zero vector |
 | `toPolar()` | `PolarForm` |
