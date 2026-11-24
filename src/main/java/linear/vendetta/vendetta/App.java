@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * JavaFX App. Run with no arguments for the GUI, or with "--console" for the console version.
@@ -69,7 +70,7 @@ public class App extends Application{
         checkCoconut();
         
         if (args.length > 0 && args[0].equals("--console")) {
-            ConsoleApp.main(args);   
+            ConsoleApp.main(Arrays.copyOfRange(args, 1, args.length));
         } else {
             launch(args);
         }
