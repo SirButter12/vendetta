@@ -3,7 +3,6 @@ package linear.vendetta.vendetta.api.dsl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.lang.Math;
 import linear.vendetta.vendetta.api.linear_algebra.Matrix;
 import linear.vendetta.vendetta.api.linear_algebra.SystemMatrix;
 import linear.vendetta.vendetta.api.linear_algebra.Vector;
@@ -184,7 +183,7 @@ public class Evaluator {
             SystemMatrix systemMatrix = new SystemMatrix(m, v);
 
             SolutionVector s =  systemMatrix.gaussJordan();
-
+            
             return s;
         }
 
